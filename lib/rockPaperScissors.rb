@@ -1,7 +1,7 @@
 require 'pg'
-require_relative 'chatitude/repos/users_repo.rb'
+require_relative 'rockPaperScissors/repos/users_repo.rb'
 
-module Chatitude
+module RockPaperScissors
   def self.create_db_connection dbname
     PG.connect(host: 'localhost', dbname: dbname)
   end
@@ -10,6 +10,8 @@ module Chatitude
     db.exec <<-SQL
       DELETE FROM users;
       DELETE FROM sessions;
+      DELETE FROM matches;
+      DELETE FROM rounds;
     SQL
   end
 
@@ -25,6 +27,19 @@ module Chatitude
         user_id INTEGER REFERENCES users (id),
         token TEXT UNIQUE
       );
+      CREATE TABLE IF NOT EXISTS matches(
+        id SERIAL PRIMARY KEY,
+        host_id integer references users(id),
+        guest_id integer references users(id),
+        winner_id integer references users(id)
+      );
+      CREATE TABLE IF NOT EXISTS rounds(
+        id SERIAL PRIMARY KEY,
+        match_id integer references matches(id),
+        host_choice VARCHAR,
+        guest_choice VARCHAR,
+        winner_id integer references users(id)
+      );
     SQL
   end
 
@@ -32,6 +47,8 @@ module Chatitude
     db.exec <<-SQL
       DROP TABLE IF EXISTS users;
       DROP TABLE IF EXISTS sessions;
+      DROP TABLE IF EXISTS matches;
+      DROP TABLE IF EXISTS rounds;
     SQL
   end
 
