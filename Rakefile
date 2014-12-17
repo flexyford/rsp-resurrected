@@ -33,7 +33,7 @@ namespace :db do
 
   task :clear => :environment do
     db = RockPaperScissors.create_db_connection 'rock_paper_scissors'
-    RockPaperScissors.clear_tables db
+    RockPaperScissors.clear db
     puts 'Cleared tables.'
   end
 
