@@ -49,5 +49,9 @@ module RockPaperScissors
       db.exec("DELETE FROM sessions WHERE token = $1", [token])
     end
 
+    def self.user_record db, user_id
+      # Table which has win, loss, draw columns with counts to idicate the user's overall record
+    end
+
   end
 end
