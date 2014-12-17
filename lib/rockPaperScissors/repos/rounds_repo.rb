@@ -5,5 +5,26 @@ module RockPaperScissors
       result = db.exec(sql, [round_id])
       result.first
     end
+
+    def self.find_active_by_user db, user_id
+
+    end
+
+    def self.find_active_by_match db, match_id
+
+    end
+
+    def self.find_by_user db, user_id
+      
+    end
+
+    def self.find_by_match db, match_id
+      
+    end
+
+    def self.save db match_data
+
+    end
+
   end
 end
