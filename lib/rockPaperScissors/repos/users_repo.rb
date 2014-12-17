@@ -1,7 +1,9 @@
+
 require 'securerandom'
 require 'pg'
 
-module Chatitude
+module RockPaperScissors
+
   class UsersRepo
     def self.find db, user_id
       sql = %q[SELECT * FROM users WHERE id = $1]
@@ -46,5 +48,6 @@ module Chatitude
     def self.sign_out db, token
       db.exec("DELETE FROM sessions WHERE token = $1", [token])
     end
+
   end
 end

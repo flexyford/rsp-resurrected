@@ -3,7 +3,7 @@ require 'sinatra/reloader'
 require 'json'
 require 'pry-byebug'
 
-require './lib/rock_paper_scissors'
+require './lib/RockPaperScissors.rb'
 
 # set :bind, '0.0.0.0' # This is needed for Vagrant
 
