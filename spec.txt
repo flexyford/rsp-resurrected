@@ -1,0 +1,39 @@
+designate head
+email repo to gilbert and nick
+
+# planning
+- Read through lesson
+- Draw ERD of your relationships, app can have many, game only 2
+- How do you know who's turn it is?
+- How do you declare a winner?
+- ERB(logins?) or JSON API server(tokens)??
+- 
+
+#notes 
+- async gameplay(stateless)
+
+- Matches are played asynchronously
+This means that both players do not have to be playing at the same time. If player 1 plays "Rock", and player 2 plays "Paper" a day later, everything should be ok.
+Google asynchronous gameplay definition
+
+-Matches are first to 3 wins
+
+-Each game will show a history of the current match
+Example: In game 3, the players will be able to see the picks and results of games 1 and 2.
+
+-Users sign in with a username and password
+
+-Users can also sign up if the username does not exist
+
+-You will need to implement sessions (see next point).
+
+-When a user signs in, they should be able to start a game with another player by username
+
+-When a user signs in, they should be able to see all their current games
+
+-Clicking on a game should take the user to that game's show page
+
+-On a game's show page, the user should be able to see the current status of the game
+This includes who has/hasn't played the current round, as well as a move history of the game
+
+-On a game's show page, a user should be able to make a move (if they have not made a move for that round already)
