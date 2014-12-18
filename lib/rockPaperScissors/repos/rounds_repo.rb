@@ -43,7 +43,9 @@ module RockPaperScissors
     end
 
     def self.save db, match_data
-      #user makes a move
+      #new empty round
+      #update player choice
+      #set round winner
     end
 
   end
