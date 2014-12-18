@@ -34,7 +34,7 @@ module RockPaperScissors
         winner_id integer references users(id)
       );
       CREATE TABLE IF NOT EXISTS rounds(
-        id SERIAL PRIMARY KEY,
+        id integer,
         match_id integer references matches(id),
         host_choice VARCHAR,
         guest_choice VARCHAR,
