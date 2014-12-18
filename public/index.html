@@ -144,7 +144,22 @@ $(document).ready(function(e){
   $('#navbar-container').append($('#log-in-template').html());
   $('#body-container').append($('#signup-page-template').html());
 })
-
+$(document).on('click','#signup_link', function(e) {
+  e.preventDefault;
+  var username = document.getElementById('username').value;
+  var password = document.getElementById('password').value;
+  var password2 = document.getElementById('password2').value;
+  if (password != password2){
+    alert('Passwords do not match');
+  }
+  else {
+  var userInfo = {
+    'username': username,
+    'password': password
+  };
+  console.log(userInfo)
+}
+})
 
 $(document).on('click','#login', function(e) {
   e.preventDefault;
