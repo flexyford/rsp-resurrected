@@ -55,7 +55,7 @@
     <div class="collapse navbar-collapse pull-right" id="logout-link">
       <ul class="nav navbar-nav">
         <li>
-          <a href="#">Log Out</a>
+          <a href="#">Currently logged in as {{u}}. Log Out?</a>
         </li>
       </ul>
     </div>
@@ -140,7 +140,14 @@
 <!-- js -->
 <script>
 function user_logged(user_name){
-   $('#navbar-container').empty().append($('#log-out-template').html());
+   $('#navbar-container').empty()
+    var source = $("#log-out-template").html();
+    var template = Handlebars.compile(source);
+    
+    var myNewHTML = template({
+        u: user_name
+    });
+    $('#navbar-container').append(myNewHTML);
 }
 $(document).ready(function(e){
   e.preventDefault;
