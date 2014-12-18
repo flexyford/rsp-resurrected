@@ -86,7 +86,7 @@
         <div class="col-md-3" id='player-drop-down'>
          <select id='select'>
             {{#each users}}
-            <option value="{{user_id}}">{{u}}<option>
+            <option value="{{user_id}}">{{u}}<option>// needs to be associated with ajax query
             {{/each}}
          </select>
          </div>
@@ -96,15 +96,16 @@
        </div>
        <div class="col-lg-3 text-center">
           <h3>Current leaders:</h3>
-          <p class="lead">STATS PAGE</p>
+          <p class="lead">{{name}} : {{count}}</p>
        </div>
        <div class="col-lg-3 text-center">
           <h3>Your progress:</h3>
-          <p class="prog">STATS PAGE</p>
+          <p class="prog">Matches won:{{record['wins']}}</p>
+          <p class="prog">Matches lost:{{record['loses']}}</p>
        </div>
        <div class="col-lg-3 text-center">
           <h3>Current games:</h3>
-          <p class="current"><a href='#'>STATS PAGE</a></p>
+          <p class="current"><a href='#'>Match:{{match_id}}</a></p>
        </div>
        <div class="col-lg-2 text-center">
        </div>
@@ -201,7 +202,7 @@ $(document).on('click','#home-navigate', function(e) {
   var source = $("#select").html();
   var template = Handlebars.compile(source);
 
-  var users = template({
+  var users = template({ // THIS NEEDS AN AJAX QUERY
     user_id: 1,
     u: john
   });
