@@ -27,13 +27,14 @@ module RockPaperScissors
     def self.find_by_user db, user_id
       # An array of hashes, where each hash has all the data for that match  
       sql =<<-SQL 
-        SELECT * FROM matches where host_id = $1 or guest_id = $1
+       SELECT * FROM matches where host_id = $1 or guest_id = $1
        SQL
       db.exec(sql, [user_id]).entries
     end
 
 
     def self.save db, match_data
+
       if match_data['id']
         # Update Winner
         if match_data['winner_id']

@@ -9,6 +9,8 @@
   <meta name="author" content="">
     <title>Rock, Paper, Scissors</title>
   <!-- Bootstrap Core CSS -->
+    <script src="js/jquery.js"></script>
+    <script src="js/handlebars-v2.0.0.js"></script>
     <link href="css/bootstrap.min.css" rel="stylesheet">
   <!-- Custom CSS -->
       <style>
@@ -29,13 +31,10 @@
 <!-- Navigation -->
 <nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
 <div  id='navbar-container' class="container">
-  
 </div>
 </nav>
 
 <div  id='body-container' class="container">
-  
-
 </div>
 
 <!-- scripts for templates -->
@@ -43,17 +42,17 @@
     <div class="navbar-header">
       <p class="navbar-brand">Rock, Paper, Scissors</p>                    
     </div>
-    <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
-      <input class="navbar-brand pull-right" type='password' name='pass' placeholder='Password'></input>
-      <input class="navbar-brand pull-right" type='text' name='user' placeholder='Username'></input>
+    <div class="collapse navbar-collapse" id="signin-form">
+      <input class="navbar-brand pull-right" type='password' id='pass' placeholder='Password'></input>
+      <input class="navbar-brand pull-right" type='text' id='user' placeholder='Username'></input>
       <a class="navbar-brand pull-right" href="#" id='login'>Login</a>
     </div>
   </script>
-  <script id='log-out-template' type='text/x-handlebars-template'>
+<script id='log-out-template' type='text/x-handlebars-template'>
     <div class="navbar-header">
       <p class="navbar-brand">Rock, Paper, Scissors</p>                    
     </div>
-    <div class="collapse navbar-collapse pull-right" id="bs-example-navbar-collapse-1">
+    <div class="collapse navbar-collapse pull-right" id="logout-link">
       <ul class="nav navbar-nav">
         <li>
           <a href="#">Log Out</a>
@@ -133,10 +132,32 @@
 
   </div>
 </script> 
+<!-- js -->
+<script>
+$(document).ready(function(e){
+  e.preventDefault;
+  $('#navbar-container').append($('#log-in-template').html());
+})
+
+
+$(document).on('click','#login', function(e) {
+  e.preventDefault;
+  var username = document.getElementById('user').value;
+  var password = document.getElementById('pass').value;
+  var userInfo = {
+    'username': username,
+    'password': password
+  };
+  console.log(userInfo)
+  $.ajax({
+    //put ajax carp here
+  }) 
+})
+
+$('')
+</script>
 <!-- jQuery Version 1.11.1 -->
-<script src="js/jquery.js"></script>
-<script src="js/handlebars-v2.0.0.js"></script>
-<script src="js/templates.js"></script>
+
 <!-- Bootstrap Core JavaScript -->
 <script src="js/bootstrap.min.js"></script>
 

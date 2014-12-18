@@ -42,6 +42,7 @@ module RockPaperScissors
       db.exec(sql, [match_id]).entries
     end
 
+
     def self.save db, round_data
       if round_data['id']
         # Update Winner
