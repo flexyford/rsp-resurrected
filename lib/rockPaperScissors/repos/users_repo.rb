@@ -34,7 +34,7 @@ module RockPaperScissors
 
     def self.save db, user_data
       sql = %q[INSERT INTO users (username, password) VALUES ($1, $2) RETURNING *]
-      result = db.exec(sql, [user_data[:username], user_data[:password]])
+      result = db.exec(sql, [user_data['usernames'], user_data['password']])
       result.first
     end
 
@@ -51,6 +51,10 @@ module RockPaperScissors
 
     def self.user_record db, user_id
       # Table which has win, loss, draw columns with counts to idicate the user's overall record
+    end
+
+    def self.destroy(db, user_id)
+      db.exec("DELETE FROM users WHERE id = $1", [user_id])
     end
 
   end

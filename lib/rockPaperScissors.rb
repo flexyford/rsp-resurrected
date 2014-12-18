@@ -1,7 +1,14 @@
 require 'pg'
 require_relative 'rockPaperScissors/repos/users_repo.rb'
+require_relative 'rockPaperScissors/repos/matches_repo.rb'
+require_relative 'rockPaperScissors/repos/rounds_repo.rb'
 
 module RockPaperScissors
+
+  ROCK = 'r'
+  PAPER = 'p'
+  SCISSORS = 's'
+
   def self.create_db_connection dbname
     PG.connect(host: 'localhost', dbname: dbname)
   end
@@ -34,7 +41,7 @@ module RockPaperScissors
         winner_id integer references users(id)
       );
       CREATE TABLE IF NOT EXISTS rounds(
-        id integer,
+        id SERIAL PRIMARY KEY,
         match_id integer references matches(id),
         host_choice VARCHAR,
         guest_choice VARCHAR,
