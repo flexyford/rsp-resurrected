@@ -6,4 +6,4 @@ bundle exec rake db:seed
 
 #bundle exec rspec
 
-#bundle exec rackup -p 4567
+bundle exec rackup -p 4567
