@@ -36,36 +36,33 @@
     <!-- Navigation -->
     <nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
         <div class="container">
-            <!-- Brand and toggle get grouped for better mobile display -->
             <div class="navbar-header">
-                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
-                    <span class="sr-only">Toggle navigation</span>
-                    <span class="icon-bar"></span>
-                    <span class="icon-bar"></span>
-                    <span class="icon-bar"></span>
-                </button>
-                <a class="navbar-brand" href="#">Start Bootstrap</a>
+               <p class="navbar-brand">Rock, Paper, Scissors</p>                    
             </div>
             <!-- Collect the nav links, forms, and other content for toggling -->
-            <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
-                <ul class="nav navbar-nav">
-                    <li>
-                        <a href="#">About</a>
-                    </li>
-                    <li>
-                        <a href="#">Services</a>
-                    </li>
-                    <li>
-                        <a href="#">Contact</a>
-                    </li>
-                </ul>
-            </div>
+            <script id='log-out-template' type='text/x-handlebars-template'>
+                <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+                    <ul class="nav navbar-nav">
+                        <li>
+                            <a href="#">Log Out</a>
+                        </li>
+                    </ul>
+                </div>
+            </script>
+            <!--<script id='log-in-template' type='text/x-handlebars-template'> -->
+                <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+                            <input class="navbar-brand pull-right" type='password' name='pass' placeholder='Password'></input>
+                            <input class="navbar-brand pull-right" type='text' name='user' placeholder='Username'></input>
+                            <a class="navbar-brand pull-right" href="#" id='login'>Login</a>
+                </div>
+            <!</script>
             <!-- /.navbar-collapse -->
         </div>
         <!-- /.container -->
     </nav>
 
     <!-- Page Content -->
+    <script id='login-page-template' type='text/x-handlebars-template'>
     <div class="container" id="login">
         <div class="col-lg-2 text-center">
                 <h1>A Bootstrap Starter Template</h1>
@@ -76,6 +73,8 @@
                 </ul>
             </div>
     </div>
+    </script>
+    <script id='stats-page-template' type='text/x-handlebars-template'>
     <div class="container" id="stats">
         <div class="col-lg-2 text-center">
                 <h1>A Bootstrap Starter Template</h1>
@@ -86,6 +85,8 @@
                 </ul>
             </div>
     </div>
+    </script>
+    <script id='game-page-template' type='text/x-handlebars-template'>
     <div class="container" id="game">
         <div class="row">
             <div class="col-lg-2 text-center">
@@ -132,10 +133,12 @@
         <!-- /.row -->
 
     </div>
+    </script>
     <!-- /.container -->
 
     <!-- jQuery Version 1.11.1 -->
     <script src="js/jquery.js"></script>
+    <script src="js/handlebars-v2.0.0.js"></script>
 
     <!-- Bootstrap Core JavaScript -->
     <script src="js/bootstrap.min.js"></script>
