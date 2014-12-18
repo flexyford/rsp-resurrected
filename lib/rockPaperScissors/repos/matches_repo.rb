@@ -1,4 +1,5 @@
 require 'pg'
+require 'pry-byebug'
 
 module RockPaperScissors
   class MatchesRepo
@@ -33,15 +34,17 @@ module RockPaperScissors
 
 
     def self.save db, match_data
-      if match_data['winner_id']  # enter winner id
-        sql = <<-SQL UPDATE matches SET winner_id = $1 where id = $2 
-          SQL
-        db.exec(sql,[match_data['winner_id'], match_data['id']])
-      else 
-        sql =<<-SQL 
-        INSERT INTO matches (host_id, guest_id) values ($1, $2) returning *
-        SQL
-        db.exec(sql, [match_data['host_id'], match_data['guest_id']]).entries
+
+      if match_data['id']
+        # Update Winner
+        if match_data['winner_id']
+          sql = %q[UPDATE matches SET winner_id = $2 WHERE id = $1 RETURNING *]
+          db.exec(sql, [match_data['id'], match_data['winner_id']])
+        end
+        find(db, match_data['id'])
+      else
+        sql = %q[INSERT INTO matches (host_id, guest_id) VALUES ($1, $2) RETURNING *]
+        db.exec(sql, [match_data['host_id'], match_data['guest_id']]).entries.first
       end
     end
 

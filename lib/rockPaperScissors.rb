@@ -19,10 +19,10 @@ module RockPaperScissors
 
   def self.clear db
     db.exec <<-SQL
-      DELETE FROM users;
-      DELETE FROM sessions;
-      DELETE FROM matches;
       DELETE FROM rounds;
+      DELETE FROM matches;
+      DELETE FROM sessions;
+      DELETE FROM users;    
     SQL
   end
 
@@ -56,10 +56,10 @@ module RockPaperScissors
 
   def self.drop_tables db
     db.exec <<-SQL
-      DROP TABLE IF EXISTS users;
-      DROP TABLE IF EXISTS sessions;
-      DROP TABLE IF EXISTS matches;
       DROP TABLE IF EXISTS rounds;
+      DROP TABLE IF EXISTS matches;
+      DROP TABLE IF EXISTS sessions;
+      DROP TABLE IF EXISTS users;
     SQL
   end
 

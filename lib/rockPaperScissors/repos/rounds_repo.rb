@@ -42,10 +42,27 @@ module RockPaperScissors
       db.exec(sql, [match_id]).entries
     end
 
-    def self.save db, match_data
-      #new empty round
-      #update player choice
-      #set round winner
+
+    def self.save db, round_data
+      if round_data['id']
+        # Update Winner
+        if round_data['winner_id']
+          sql = %q[UPDATE rounds SET winner_id = $2 WHERE id = $1 RETURNING *]
+          db.exec(sql, [round_data['id'], round_data['winner_id']])
+        end
+        if round_data['host_choice']
+          sql = %q[UPDATE rounds SET host_choice = $2 WHERE id = $1 RETURNING *]
+          db.exec(sql, [round_data['id'], round_data['host_choice']])
+        end
+        if round_data['guest_choice']
+          sql = %q[UPDATE rounds SET guest_choice = $2 WHERE id = $1 RETURNING *]
+          db.exec(sql, [round_data['id'], round_data['guest_choice']])
+        end
+        find(db, round_data['id'])
+      else
+        sql = %q[INSERT INTO rounds (match_id) VALUES ($1, $2) RETURNING *]
+        db.exec(sql, [round_data['host_id'], round_data['guest_id']]).entries.first
+      end
     end
 
   end
