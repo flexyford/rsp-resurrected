@@ -53,5 +53,9 @@ module RockPaperScissors
       # Table which has win, loss, draw columns with counts to idicate the user's overall record
     end
 
+    def self.destroy(db, user_id)
+      db.exec("DELETE FROM users WHERE id = $1", [user_id])
+    end
+
   end
 end

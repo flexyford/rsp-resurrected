@@ -1,7 +1,14 @@
 require 'pg'
 require_relative 'rockPaperScissors/repos/users_repo.rb'
+require_relative 'rockPaperScissors/repos/matches_repo.rb'
+require_relative 'rockPaperScissors/repos/rounds_repo.rb'
 
 module RockPaperScissors
+
+  ROCK = 'r'
+  PAPER = 'p'
+  SCISSORS = 's'
+
   def self.create_db_connection dbname
     PG.connect(host: 'localhost', dbname: dbname)
   end

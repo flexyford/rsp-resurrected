@@ -1,3 +1,5 @@
+require 'pg'
+
 module RockPaperScissors
   class RoundsRepo
     def self.find db, round_id
@@ -22,7 +24,7 @@ module RockPaperScissors
       
     end
 
-    def self.save db match_data
+    def self.save db, match_data
 
     end
 
