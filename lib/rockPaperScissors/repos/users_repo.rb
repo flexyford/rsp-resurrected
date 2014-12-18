@@ -1,7 +1,6 @@
 
 require 'securerandom'
 require 'pg'
-require 'pry-byebug'
 
 module RockPaperScissors
 

@@ -31,6 +31,7 @@ module RockPaperScissors
       db.exec(sql, [user_id]).entries
     end
 
+
     def self.save db, match_data
         sql =<<-SQL 
           INSERT INTO matches (host_id, guest_id) values ($1, $2)
