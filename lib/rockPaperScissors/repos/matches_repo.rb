@@ -1,3 +1,5 @@
+require 'pg'
+
 module RockPaperScissors
   class MatchesRepo
     def self.find db, match_id
@@ -24,10 +26,11 @@ module RockPaperScissors
       db.exec(sql, [user_id]).entries
     end
 
-    def self.save db match_data
+
+    def self.save db, match_data
         sql =<<-SQL 
-        INSERT INTO matches (host_id, guest_id) values ($1, $2)
-        SQL
+          INSERT INTO matches (host_id, guest_id) values ($1, $2)
+          SQL
         db.exec(sql, [match_data['host_id'], match_data['guest_id']]).entries
     end
 

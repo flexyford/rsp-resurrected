@@ -1,3 +1,5 @@
+require 'pg'
+
 module RockPaperScissors
   class RoundsRepo
     def self.find db, round_id
