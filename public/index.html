@@ -7,7 +7,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="description" content="">
   <meta name="author" content="">
-    <title>Rock, Paper, Scissors</title>
+    <title>Rock, Paper, Scissors by Team Blue Barracuda</title>
   <!-- Bootstrap Core CSS -->
     <script src="js/jquery.js"></script>
     <script src="js/handlebars-v2.0.0.js"></script>
@@ -40,7 +40,7 @@
 <!-- scripts for templates -->
 <script id='log-in-template' type='text/x-handlebars-template'> 
     <div class="navbar-header">
-      <p class="navbar-brand">Rock, Paper, Scissors</p>                    
+      <p class="navbar-brand">Rock, Paper, Scissors by Team Blue Barracuda</p>                    
     </div>
     <div class="collapse navbar-collapse" id="signin-form" style='display:inline'>
       <input class="navbar-brand pull-right" type='password' id='pass' style='display:inline' placeholder='Password'></input>
@@ -48,9 +48,20 @@
       <a class="navbar-brand pull-right" href="#" id='login'>Login</a>
     </div>
   </script>
+
+<script id='load-buttons-template' type='text/x-handlebars-template'>
+  <div id='choice-buttons' class='btn-group btn-group-vertical'>
+    <button type="button" class="btn"><i class='glyphicon glyphicon-leaf' style="font-size:48px;"></i></button>
+    <button type="button" class="btn"><i class='glyphicon glyphicon-fire' style="font-size:48px;"></i></button>
+    <button type="button" class="btn"><i class='glyphicon glyphicon-tint' style="font-size:48px;"></i></button>
+  </div>
+</script>
+
 <script id='log-out-template' type='text/x-handlebars-template'>
     <div class="navbar-header">
-      <p id='home-navigate' class="navbar-brand">Rock, Paper, Scissors</p>
+      <li class="active">
+        <a href="#" id='home-navigate' class="navbar-brand">Rock, Paper, Scissors by Team Blue Barracuda</a>
+      </li>
     </div>
     <div class="collapse navbar-collapse pull-right" id="logout-link">
       <ul class="nav navbar-nav">
@@ -79,12 +90,17 @@
   </script>
 <script id='stats-page-template' type='text/x-handlebars-template'>
     <div class="container" id='player-choose'>
+      <button id='game-page'>REDIRECT TO GAME PAGE</button>
       <div class='row'>
         <div class="col-md-4 col-md-offset-2">
         <h3>Please select a player</h3>
         </div>
         <div class="col-md-3" id='player-drop-down'>
-         <h3>text</h3>
+         <select id='select'>
+            {{#each users}}
+            <option value="{{user_id}}">{{u}}<option>// needs to be associated with ajax query
+            {{/each}}
+         </select>
          </div>
       </div>
      <div class='row'> 
@@ -92,15 +108,16 @@
        </div>
        <div class="col-lg-3 text-center">
           <h3>Current leaders:</h3>
-          <p class="lead">STATS PAGE</p>
+          <p class="lead">{{name}} : {{count}}</p>
        </div>
        <div class="col-lg-3 text-center">
           <h3>Your progress:</h3>
-          <p class="prog">STATS PAGE</p>
+          <p class="prog">Matches won:{{record['wins']}}</p> // ALL OF THESE NEED HOOKUPS TO DB WITH DUMMY DATA.
+          <p class="prog">Matches lost:{{record['loses']}}</p>
        </div>
        <div class="col-lg-3 text-center">
           <h3>Current games:</h3>
-          <p class="current"><a href='#'>STATS PAGE</a></p>
+          <p class="current"><a href='#'>Match:{{match_id}}</a></p>
        </div>
        <div class="col-lg-2 text-center">
        </div>
@@ -112,6 +129,11 @@
     <div class="row">
       <div class="col-lg-2 text-center">
         <h1>This is where we make the choice of R, P, S</h1>
+        <div id='choice-buttons' class='btn-group btn-group-vertical'>
+          <button type="button" class="btn"><i class='glyphicon glyphicon-leaf' style="font-size:48px;"></i></button>
+          <button type="button" class="btn"><i class='glyphicon glyphicon-fire' style="font-size:48px;"></i></button>
+          <button type="button" class="btn"><i class='glyphicon glyphicon-tint' style="font-size:48px;"></i></button>
+        </div>
       </div>
     <div class="col-lg-3 text-center">
       <h1>This will display game host name</h1>
@@ -169,11 +191,20 @@ $(document).on('click','#signup_link', function(e) {
     'password': password
   };
   user_logged(username)
-}
+  $.ajax({
+      url: '/signup', 
+      type: 'POST',
+      data: userInfo,
+      success: function(data) {
+      alert("Successfully Signed Up")
+      }
+    })
+  }
 })
 
 $(document).on('click','#login', function(e) {
   e.preventDefault;
+  localStorage.delete;
   var username = document.getElementById('user').value;
   var password = document.getElementById('pass').value;
   var userInfo = {
@@ -183,6 +214,15 @@ $(document).on('click','#login', function(e) {
   user_logged(username);
   $.ajax({
     //put ajax crap here
+    url: '/signin',//needs to point to endpoint
+    type: 'POST', 
+    data: userInfo,
+    success: function(returned) {
+      console.log(returned);
+      localStorage.setItem('token', returned['token']);
+      localStorage.setItem('user_id', returned['id']);
+      alert('Logged in!!')
+    }
   }) 
 })
 
@@ -194,12 +234,40 @@ $(document).on('click','#logout', function(e) {
 
 $(document).on('click','#home-navigate', function(e) {
   e.preventDefault;
+  //user list
+  var list1 = $("#select").html();
+  var template1 = Handlebars.compile(list1);
+  //leaderboard
+  var list2 = $("#lead").html();
+  var template2 = Handlebars.compile(list2);
+  //current user record
+  var list3 = $("#prog").html();
+  var template3 = Handlebars.compile(list3);
+  //current matches
+  var list4 = $("#current").html();
+  var template4 = Handlebars.compile(list4);
+
+  var users = template1({ // THIS NEEDS AN AJAX QUERY
+    user_id: 1,
+    u: john
+  });
   $('#body-container').empty().append($("#stats-page-template").html());
 })
 
 $(document).on('click','#game-page', function(e) {
   e.preventDefault;
   $('#body-container').empty().append($('#game-page-template').html());
+  $('.glyphicon.glyphicon-leaf').css('color','green')
+  $('.glyphicon.glyphicon-fire').css('color','red')
+  $('.glyphicon.glyphicon-tint').css('color','blue')
+  $('.btn').hover(
+       function () {
+         $(this).css('background-color','black');
+       }, 
+      function () {
+          $(this).css('background-color','');
+       }
+     );
 })
 
 </script>
