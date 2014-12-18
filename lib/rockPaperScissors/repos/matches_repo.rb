@@ -23,6 +23,13 @@ module RockPaperScissors
       db.exec(sql, [user_id]).entries
     end
 
+    def self.find_complete_by_user db, user_id
+      sql =<<-SQL
+        SELECT * FROM matches where (host_id = $1 or guest_id = $1) 
+        and winner_id IS NOT NULL
+      SQL
+      db.exec(sql, [user_id]).entries
+    end
 
     def self.find_by_user db, user_id
       # An array of hashes, where each hash has all the data for that match  
