@@ -1,5 +1,6 @@
 require 'spec_helper'
 require 'pg'
+require 'pry-byebug'
 
 describe RockPaperScissors::UsersRepo do
 
@@ -18,11 +19,11 @@ describe RockPaperScissors::UsersRepo do
   # Before each 'it' block we are clearing the data base
   # That way when we crete users we know exactly how many should be in the db
   before(:each) do
-    RockPaperScissors.clear_db(db)
+    RockPaperScissors.clear(db)
     RockPaperScissors.create_tables(db)
   end
 
-  xit "gets all users" do
+  it "gets all users" do
     db.exec("INSERT INTO users (username, password) VALUES ($1, $2)", ["Alice", "password1"])
     db.exec("INSERT INTO users (username, password) VALUES ($1, $2)", ["Bob", "password2"])
 
@@ -34,7 +35,7 @@ describe RockPaperScissors::UsersRepo do
     expect(names).to include "Alice", "Bob"
   end
 
-  xit "creates users" do
+  it "creates users" do
     expect(user_count(db)).to eq 0
     user = RockPaperScissors::UsersRepo.save db, { 'username' => "Alice", 'password' => "password1" }
     expect(user).to be_a Hash
@@ -48,14 +49,14 @@ describe RockPaperScissors::UsersRepo do
     expect(user['username']).to eq "Alice"
   end
 
-  xit "finds users" do
+  it "finds users" do
     user = RockPaperScissors::UsersRepo.save db, { 'username' => "Alice", 'password' => "password1" }
     retrieved_user = RockPaperScissors::UsersRepo.find(db, user['id'])
     expect(retrieved_user).to be_a Hash
     expect(retrieved_user['username']).to eq "Alice"
   end
 
-  xit "updates users" do
+  it "updates users" do
     user1 = RockPaperScissors::UsersRepo.save db, { 'username' => "Alice", 'password' => "password1" }
     user2 = RockPaperScissors::UsersRepo.save(db, { 'id' => user1['id'], 'username' => "Alicia" })
     expect(user2).to be_a Hash
@@ -68,7 +69,7 @@ describe RockPaperScissors::UsersRepo do
     expect(user3['username']).to eq "Alicia"
   end
 
-  xit "destroys users" do
+  it "destroys users" do
     user = RockPaperScissors::UsersRepo.save db, { 'username' => "Alice", 'password' => "password1" }
     expect(user_count(db)).to eq 1
 

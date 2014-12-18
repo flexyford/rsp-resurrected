@@ -9,6 +9,10 @@ module RockPaperScissors
   PAPER = 'p'
   SCISSORS = 's'
 
+  def self.create_db(dbname)
+    success = system("createdb #{dbname}")
+  end
+
   def self.create_db_connection dbname
     PG.connect(host: 'localhost', dbname: dbname)
   end
