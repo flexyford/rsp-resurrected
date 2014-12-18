@@ -110,4 +110,43 @@ describe RockPaperScissors::RoundsRepo do
     # Check that outcome is a draw
     expect(round2['winner_id']).to be_nil
   end
+
+it "check user match records" do
+    # Init Users
+    host = RockPaperScissors::UsersRepo.save db, { 'username' => "Alice", 'password' => "password1" }
+    guest = RockPaperScissors::UsersRepo.save db, { 'username' => "Bob", 'password' => "password2" }
+
+    # Init Match
+    match = RockPaperScissors::MatchesRepo.save(db, { 'host_id' => host['id'], 'guest_id' => guest['id'] })
+
+    # Init a Round 1
+    round1 = RockPaperScissors::RoundsRepo.save(db, {'match_id' => match['id']} )
+
+    # Make 1 Selection at a time
+    round1 = RockPaperScissors::RoundsRepo.save(db, { 'id' => round1['id'], 'host_choice' => RockPaperScissors::ROCK} )
+
+    round1 = RockPaperScissors::RoundsRepo.save(db, { 'id' => round1['id'], 'guest_choice' => RockPaperScissors::SCISSORS} )
+
+    # Declare Winner of Round 1
+    round1 = RockPaperScissors::RoundsRepo.save(db, { 'id' => round1['id'], 'winner_id' => host['id']} )
+
+    # Init a Round 2
+    round2 = RockPaperScissors::RoundsRepo.save(db, {'match_id' => match['id']} )
+
+    # Make 2 Selections at a time
+    round2_sel = RockPaperScissors::RoundsRepo.save(db, { 'id' => round1['id'], 'guest_choice' => RockPaperScissors::PAPER, 'host_choice' => RockPaperScissors::PAPER} )
+
+    host_record = RockPaperScissors::RoundsRepo.user_round_record(db, host['id'])
+    guest_record = RockPaperScissors::RoundsRepo.user_round_record(db, guest['id'])
+
+
+    expect(host_record['wins']).to eq "1"
+    expect(host_record['losses']).to eq "0"
+    expect(host_record['draws']).to eq "1"
+
+    expect(guest_record['wins']).to eq "0"
+    expect(guest_record['losses']).to eq "1"
+    expect(guest_record['draws']).to eq "1"
+
+  end
 end
