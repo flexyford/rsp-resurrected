@@ -111,44 +111,22 @@
   <div class="container" id="game-container">
     <div class="row">
       <div class="col-lg-2 text-center">
-        <h1>A Bootstrap Starter Template</h1>
-          <p class="lead">GAME</p>
-          <ul class="list-unstyled">
-            <li>Bootstrap v3.3.1</li>
-            <li>jQuery v1.11.1</li>
-          </ul>
+        <h1>This is where we make the choice of R, P, S</h1>
       </div>
     <div class="col-lg-3 text-center">
-      <h1>A Bootstrap Starter Template</h1>
-        <p class="lead">GAME</p>
-        <ul class="list-unstyled">
-          <li>Bootstrap v3.3.1</li>
-          <li>jQuery v1.11.1</li>
-      </ul>
+      <h1>This will display game host name</h1>
+      <p class="lead">GAME</p>
     </div>
     <div class="col-lg-2 text-center">
-      <h1>A Bootstrap Starter Template</h1>
-        <p class="lead">GAME</p>
-        <ul class="list-unstyled">
-          <li>Bootstrap v3.3.1</li>
-          <li>jQuery v1.11.1</li>
-        </ul>
+      <h1>VS button and rematch button</h1>
+      <p class="lead">GAME</p>
     </div>
     <div class="col-lg-3 text-center">
-      <h1>A Bootstrap Starter Template</h1>
-        <p class="lead">GAME</p>
-        <ul class="list-unstyled">
-          <li>Bootstrap v3.3.1</li>
-          <li>jQuery v1.11.1</li>
-        </ul>
+      <h1>This will display game guest name</h1>
+      <p class="lead">GAME</p>
     </div>
     <div class="col-lg-2 text-center">
-      <h1>A Bootstrap Starter Template</h1>
-        <p class="lead">GAME</p>
-        <ul class="list-unstyled">
-          <li>Bootstrap v3.3.1</li>
-          <li>jQuery v1.11.1</li>
-        </ul>
+      <h1>Maybe Remove This one</h1>
     </div>
     </div>
   <!-- /.row -->
@@ -157,6 +135,7 @@
 </script> 
 <!-- js -->
 <script>
+
 function user_logged(user_name){
    $('#navbar-container').empty()
     var source = $("#log-out-template").html();
@@ -168,11 +147,14 @@ function user_logged(user_name){
     $('#navbar-container').append(myNewHTML);
     $('#body-container').empty().append($("#stats-page-template").html())
 }
+
+
 $(document).ready(function(e){
   e.preventDefault;
   $('#navbar-container').append($('#log-in-template').html());
   $('#body-container').append($('#signup-page-template').html());
 })
+
 $(document).on('click','#signup_link', function(e) {
   e.preventDefault;
   var username = document.getElementById('username').value;
@@ -209,7 +191,17 @@ $(document).on('click','#logout', function(e) {
   $('#navbar-container').empty().append($('#log-in-template').html());
   $('#body-container').empty().append($('#signup-page-template').html());
 })
-$('')
+
+$(document).on('click','#home-navigate', function(e) {
+  e.preventDefault;
+  $('#body-container').empty().append($("#stats-page-template").html());
+})
+
+$(document).on('click','#game-page', function(e) {
+  e.preventDefault;
+  $('#body-container').empty().append($('#game-page-template').html());
+})
+
 </script>
 <!-- jQuery Version 1.11.1 -->
 
