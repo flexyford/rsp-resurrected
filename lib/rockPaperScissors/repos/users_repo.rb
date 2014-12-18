@@ -38,6 +38,7 @@ module RockPaperScissors
     end
 
     def self.save db, user_data
+      # Updating Information
       if user_data['id']
         # Update Username
         if user_data['username']
@@ -49,11 +50,12 @@ module RockPaperScissors
           sql = %q[UPDATE users SET password = '$2' WHERE id = $1 RETURNING *]
           db.exec(sql, [user_data['id'], user_data['password']])
         end
+        find(db, user_data['id'])
       else
         sql = %q[INSERT INTO users (username, password) VALUES ($1, $2) RETURNING *]
-        user_data['id'] = db.exec(sql, [user_data['username'], user_data['password']]).entries.first['id']
+        db.exec(sql, [user_data['username'], user_data['password']]).entries.first
       end
-      find(db, user_data['id'])
+      
     end
 
     def self.sign_in db, id
