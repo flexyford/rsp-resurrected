@@ -80,4 +80,23 @@ describe RockPaperScissors::MatchesRepo do
     expect(match3['winner_id']).to eq match1['guest_id']
   end
 
+
+it "check user match records" do
+    # create arbitrary match records
+    db.exec("INSERT INTO matches (host_id, guest_id, winner_id) values ($1, $2, $1)",[@user1['id'], @user2['id']])
+    db.exec("INSERT INTO matches (host_id, guest_id, winner_id) values ($1, $2, $1)",[@user1['id'], @user2['id']])
+    db.exec("INSERT INTO matches (host_id, guest_id, winner_id) values ($1, $2, $2)",[@user1['id'], @user2['id']])
+
+    host_record = RockPaperScissors::MatchesRepo.user_match_record(db, @user1['id'])
+    guest_record = RockPaperScissors::MatchesRepo.user_match_record(db, @user2['id'])
+
+    expect(host_record['wins']).to eq "2"
+    expect(host_record['losses']).to eq "1"
+
+    expect(guest_record['wins']).to eq "1"
+    expect(guest_record['losses']).to eq "2"
+
+
+  end
+
 end
