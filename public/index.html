@@ -50,7 +50,7 @@
   </script>
 <script id='log-out-template' type='text/x-handlebars-template'>
     <div class="navbar-header">
-      <p class="navbar-brand">Rock, Paper, Scissors</p>                    
+      <p id='home-navigate' class="navbar-brand">Rock, Paper, Scissors</p>
     </div>
     <div class="collapse navbar-collapse pull-right" id="logout-link">
       <ul class="nav navbar-nav">
@@ -148,6 +148,7 @@ function user_logged(user_name){
         u: user_name
     });
     $('#navbar-container').append(myNewHTML);
+    $('#body-container').empty().append($("#stats-page-template").html())
 }
 $(document).ready(function(e){
   e.preventDefault;
@@ -168,7 +169,6 @@ $(document).on('click','#signup_link', function(e) {
     'password': password
   };
   user_logged(username)
-  console.log(userInfo)
 }
 })
 
@@ -180,7 +180,6 @@ $(document).on('click','#login', function(e) {
     'username': username,
     'password': password
   };
-  console.log(userInfo);
   user_logged(username);
   $.ajax({
     //put ajax crap here
