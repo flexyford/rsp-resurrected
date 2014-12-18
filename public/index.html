@@ -139,6 +139,9 @@
 </script> 
 <!-- js -->
 <script>
+function user_logged(user_name){
+   $('#navbar-container').append($('#log-out-template').html(user_name));
+}
 $(document).ready(function(e){
   e.preventDefault;
   $('#navbar-container').append($('#log-in-template').html());
@@ -169,7 +172,8 @@ $(document).on('click','#login', function(e) {
     'username': username,
     'password': password
   };
-  console.log(userInfo)
+  console.log(userInfo);
+  user_logged(username);
   $.ajax({
     //put ajax crap here
   }) 
