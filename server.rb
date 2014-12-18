@@ -1,5 +1,6 @@
 require 'sinatra'
-require 'sinatra/reloader'
+# require 'sinatra/reloader'
+require 'rest-client'
 require 'json'
 require 'pry-byebug'
 
@@ -38,14 +39,15 @@ class RockPaperScissors::Server < Sinatra::Application
   # run this before every endpoint to get the current user
   before do
     # this condition assign the current user if someone is logged in
-    if params[:apiToken]
-      @current_user = RockPaperScissors::UsersRepo.find_by_token db, params[:apiToken]
+    if params[:token]
+      @current_user = RockPaperScissors::UsersRepo.find_by_token db, params[:token]
     end
 
     # the next few lines are to allow cross domain requests
     headers["Access-Control-Allow-Origin"] = "*"
     headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE, OPTIONS"
     headers["Access-Control-Allow-Headers"] = "Origin, X-Requested-With, Content-Type, Accept"
+    headers['Content-Type'] = 'application/json'
   end
 
   # Array used to store event streams
@@ -89,22 +91,22 @@ class RockPaperScissors::Server < Sinatra::Application
   # POST /signin : This endpoint accepts two parameters for the sign in process.
   #     Params : `username` - The username of the user signing in
   #              `password` - The password of the user signing in
-  #    Returns : An `apiToken` to make future authorized requests with.
+  #    Returns : An `token` to make future authorized requests with.
   post '/signin' do
     user = RockPaperScissors::UsersRepo.find_by_name db, params[:username]
 
     if user && user['password'] == params[:password]
       token = RockPaperScissors::UsersRepo.sign_in db, user['id']
-      { apiToken: token }.to_json
+      { token: token }.to_json
     else
       status 401
     end
   end
   # DELETE /signout : This endpoint accepts two parameters for the sign in process.
-  #     Params : `apiToken` - The username of the user signing in
+  #     Params : `token` - The username of the user signing in
   #    Returns : An empty 200 response.
   delete '/signout' do
-    RockPaperScissors::UsersRepo.sign_out db, params[:apiToken]
+    RockPaperScissors::UsersRepo.sign_out db, params[:token]
     status 200
     '{}'
   end
@@ -112,7 +114,7 @@ class RockPaperScissors::Server < Sinatra::Application
   ##########################################
   # event stream stuff.
 
-  # GET  /users  : This endpoint will allow you to receive users from the server.
+  # get  /users  : This endpoint will allow you to receive users from the server.
   #     Params : None.
   #     Return : An Array containing user_ids
   #              [
@@ -121,120 +123,314 @@ class RockPaperScissors::Server < Sinatra::Application
   #                  'username' => STRING username
   #                }
   #              ]
-  GET '/users' do
-
+  get '/users' do
+    users = RockPaperScissors::UsersRepo.all(db)
+    status 200
+    if !users.nil?
+      users.map {|u| { 'user_id' => u['id'], 'username' => u['username'] } }.to_json
+    else
+      '[]'
+    end
   end
 
-  # GET  /users/:user_id  : This endpoint will allow you to receive users from the server.
+  # get  /users/:user_id  : This endpoint will allow you to receive users from the server.
   #     Params : None.
   #     Return : An Hash containing user_data for user_id
   #              user_data {
   #                 'username' => STRING username
-  #                 'win'      => INTEGER num of wins
-  #                 'loss'     => INTEGER num of losses
-  #                 'draw'     => INTEGER num of draws      
+  #                 'wins'      => INTEGER num of wins
+  #                 'losses'     => INTEGER num of losses     
   #              }
-  GET '/users/:user_id' do
-
+  get '/users/:user_id' do
+    user = RockPaperScissors::UsersRepo.find(db, params[:user_id])
+    if user
+      record = RockPaperScissors::MatchesRepo.user_match_record(db, user['id'])
+      status 200
+      {
+        'username' => user['username'],
+        'wins' => record['wins'],
+        'losses' => record['losses']
+      }
+    else
+      errors << 'user not found'
+      status 401
+      { errors: errors }.to_json
+    end
   end
 
-  # GET  /users/:user_id/matches  : This endpoint will allow you to receive users from the server.
+  # get  /users/:user_id/matches  : This endpoint will allow you to receive users from the server.
   #     Params : None.
   #     Return : An Hash containing match_ids of all matches
   #              [INTEGER match_ids]
-  GET '/users/:user_id/matches' do
-
+  get '/users/:user_id/matches' do
+    user = RockPaperScissors::UsersRepo.find(db, params[:user_id])
+    if user
+      matches = RockPaperScissors::MatchesRepo.find_by_user(db, user['id'])
+      status 200
+      if !matches.nil?
+        matches.map {|m| m['id'] }.to_json
+      else
+        '[]'
+      end
+    else
+      errors << 'user not found'
+      status 401
+      { errors: errors }.to_json
+    end
   end
 
-  # GET  /users/:user_id/matches  : This endpoint will allow you to receive users from the server.
+  # get  /users/:user_id/matches  : This endpoint will allow you to receive users from the server.
   #     Params : None.
   #     Return : An Array of Hashes containing rounds_data for user_id
-  # GET '/users/:user_id/rounds' do
+  # get '/users/:user_id/rounds' do
 
   # end
 
-  # GET  /matches  : This endpoint will allow you to receive matches from the server.
+  # get  /matches  : This endpoint will allow you to receive matches from the server.
   #     Params : None.
   #     Return : An Hash containing match_ids of all matches
   #              [INTEGER match_ids]
-  GET '/matches' do
-
+  get '/matches' do
+    matches = RockPaperScissors::MatchesRepo.all(db)
+    status 200
+    if !matches.nil?
+        matches.map {|m| m['id'] }.to_json
+    else
+      '[]'
+    end
   end
 
   # POST  /matches  : This endpoint will allow you to create a new match and new round for that match
-  #     Params : `apiToken` - The api token of the signed in user.
+  #     Params : `token` - The api token of the signed in user.
   #              `guest_name` - The username of the challenged guest
   #     Return : A Hash containing { 'match_id' => match_id, 'round_id' => round_id}
-  POST '/matches' do
+  post '/matches' do
+    errors = []
+    host = RockPaperScissors::UsersRepo.find_by_token(db, params[:token])
+    guest = RockPaperScissors::UsersRepo.find_by_name(db, params[:guest_name])
 
+    if host && (session[:user_id] == host['id']) && guest
+      # Update Round
+      if guest
+        # Create Match
+        match = RockPaperScissors::MatchesRepo.save(db, { 'host_id' => host['id'], 'guest_id' => guest['id'] })
+        # Create Round
+        round = RockPaperScissors::RoundsRepo.save(db, {'match_id' => match['id']} )
+        {
+          'match_id' => match['id'],
+          'round_id' => round['id']
+        }.to_json     
+      else
+        errors << 'user is not a valid guest'
+        status 400
+        { errors: errors }.to_json
+      end
+    else
+      errors << 'user not found or user not logged in'
+      status 401
+      { errors: errors }.to_json
+    end
   end
 
-  # GET  /matches/:match_id  : This endpoint will allow you to receive match_data for match_id from the server.
+  # get  /matches/:match_id  : This endpoint will allow you to receive match_data for match_id from the server.
   #     Params : None.
   #     Return : A Hash containing match_data for match_id
-  #                hash { 
+  #                match_data {
+  #                  'id'        => INTEGER match_id 
   #                  'host_id'   => INTEGER host_id
   #                  'guest_d'   => INTEGER guest_id
   #                  'winner_id' => INTEGER winner_id
   #                  'rounds'    => [INTEGER round_ids] # An Array of rounds for that :match_id
   #                }
-  GET '/matches/:match_id' do
-
+  get '/matches/:match_id' do
+    errors = []
+    match = RockPaperScissors::MatchesRepo.find(db, params[:match_id])
+    rounds = RockPaperScissors::RoundsRepo.find_by_match(db, params[:match_id])
+    if match
+        {
+          'id' => match['id'],
+          'host_id' => match['host_id'],
+          'guest_id' => match['guest_id'],
+          'winner_id' => match['winner_id'],
+          'rounds' => rounds
+        }.to_json
+    else
+      errors << 'match not found'
+      status 401
+      { errors: errors }.to_json
+    end
   end
 
   # PUT  /matches:match_id  : This endpoint will allow you to update the winner of match_id on the server.
   #     Params : `winner_id` - The id of the decalred winner; Expecting Host or Guest of Match
   #     Return : A Hash containing match_data for match_id
-  #                match_data { 
+  #                match_data {
+  #                  'id'        => INTEGER match_id 
   #                  'host_id'   => INTEGER host_id
   #                  'guest_d'   => INTEGER guest_id
   #                  'winner_id' => INTEGER winner_id
   #                  'rounds'    => [INTEGER round_ids] # An Array of rounds for that :match_id
   #                }
-  PUT '/matches/:match_id' do
+  put '/matches/:match_id' do
+    errors = []
+    user = RockPaperScissors::UsersRepo.find_by_token(db, params[:winner_id])
+    
+    rounds = RockPaperScissors::RoundsRepo.find_by_match(db, params[:match_id])
+    if user && match && rounds
+      if user['id'] == match['host_id'] || user['id'] == match['guest_id']
+        # Update Winner
+        match = RockPaperScissors::MatchesRepo.save(db, { 'id' => match['id'], 'winner_id' => user['id'] })
 
+        {
+          'id' => match['id'],
+          'host_id' => match['host_id'],
+          'guest_id' => match['guest_id'],
+          'winner_id' => match['winner_id'],
+          'rounds' => rounds
+        }.to_json
+      else
+        errors << "user does not exist for this match"
+        { errors: errors }.to_json
+      end
+    else
+      status 401
+    end
   end
 
   # DELETE  /matches/:match_id  : This endpoint will delete a match and all rounds for that match
-  #     Params : `apiToken` - The api token of the signed in user; Must be Host or Guest of Match
+  #     Params : `token` - The api token of the signed in user; Must be Host or Guest of Match
   #     Returns : An empty 200 response.
-  DELETE '/matches/:match_id' do
-
+  delete '/matches/:match_id' do
+    user = RockPaperScissors::UsersRepo.find_by_token(db, params[:token])
+    if user && (session[:user_id] == user['id'])
+      match = RockPaperScissors::MatchesRepo.find(db, params[:match_id])
+      rounds = RockPaperScissors::RoundsRepo.find_by_match(db, params[:match_id])
+      if (user['id'] == match['host_id'] || user['id'] == match['guest_id']) && 
+        RockPaperScissors::MatchesRepo.destory(db, match['id'])
+      else
+        errors << 'user is not a host or guest for this match'
+        status 400
+        { errors: errors }.to_json
+      end
+    else
+      errors << 'user not found or user not logged in'
+      status 401
+      { errors: errors }.to_json
+    end
   end
 
-  # GET  /rounds  : This endpoint will allow you to receive rounds from the server.
+  # get  /rounds  : This endpoint will allow you to receive rounds from the server.
   #     Params : None.
   #     Return : An Array containing round_data for all rounds
   #              [INTEGER round_ids]
-  GET '/rounds' do
-
+  get '/rounds' do
+    rounds = RockPaperScissors::MatchesRepo.all(db)
+    status 200
+    if !rounds.nil?
+        rounds.map {|r| r['id'] }.to_json
+    else
+      '[]'
+    end
+    
   end
 
-  # GET  /rounds:round_id  : This endpoint will allow you to receive round_data for round_id from the server.
+  # get  /rounds:round_id  : This endpoint will allow you to receive round_data for round_id from the server.
   #     Params : None.
   #     Return : A Hash containing round_data for round_id
   #                round_data { 
+  #                  'id'           => INTEGER round_id
   #                  'match_id'     => INTEGER match_id
   #                  'host_choice'  => VARCHAR 'r'/'p'/'s'
   #                  'guest_choice' => VARCHAR 'r'/'p'/'s'
   #                  'winner_id'    => INTEGER winner_id
   #                }
-  GET '/rounds/:round_id' do
-
+  get '/rounds/:round_id' do
+    round_id = params[:round_id]
+    round = RockPaperScissors::RoundsRepo.find(db, round['id'])
+    if round
+      round
+    else
+      errors << 'round not found'
+      status 401
+      { errors: errors }.to_json
+    end
+    
   end
 
   # PUT  /rounds:round_id  : This endpoint will allow you to update round_data for round_id on the server.
-  #     Params : `apiToken` - The api token of the signed in user; Expecting Host or Guest of Match
+  #     Params : `token` - The api token of the signed in user; Expecting Host or Guest of Match
   #              'user_choice' - The choice that the currently signed-in user makes
   #     Return : A Hash containing round_data for round_id
-  #                round_data { 
+  #                round_data {
+  #                  'id'           => INTEGER round_id
   #                  'match_id'     => INTEGER match_id
   #                  'host_choice'  => VARCHAR 'r'/'p'/'s'
   #                  'guest_choice' => VARCHAR 'r'/'p'/'s'
   #                  'winner_id'    => INTEGER winner_id
   #                }
-  PUT '/rounds/:round_id' do
+  put '/rounds/:round_id' do
+    errors = []
+    user = RockPaperScissors::UsersRepo.find_by_token(db, params[:token])
+    
+    if user && (session[:user_id] == user['id'])
+      # Update Round
+      round = RockPaperScissors::RoundsRepo.find(db, params[:round_id])
+      match = RockPaperScissors::MatchesRepo.find(db, round['match_id'])
+      if round && match
 
+        if user['id'] == match['host_id']
+          round = RockPaperScissors::RoundsRepo.save(db, { 'id' => round['id'], 'host_choice' => params[:user_choice]} )
+          updateRoundWinner(round, match['host_id'], match['guest_id'])
+        elsif user['id'] == match['guest_id']
+          round = RockPaperScissors::RoundsRepo.save(db, { 'id' => round['id'], 'guest_choice' => params[:user_choice]} )
+          updateRoundWinner(round, match['host_id'], match['guest_id'])
+        else
+          errors << 'user is not a hot or guest for this round'
+          status 400
+          { errors: errors }.to_json
+        end
+      else
+        errors << 'no round or match data found'
+        status 401
+        { errors: errors }.to_json
+      end
+    else
+      errors << 'user not found or user not logged in'
+      status 401
+      { errors: errors }.to_json
+    end
+  end
+
+  def updateRoundWinner round_data, host_id, guest_id
+    if round_data['host_choice'] && round_data['guest_choice']
+      if round_data['host_choice'] != round_data['guest_choice']
+        if round_data['host_choice'] == RockPaperScissors::ROCK
+          if round_data['guest_choice'] == RockPaperScissors::PAPER
+            # Guest Wins
+            RockPaperScissors::RoundsRepo.save(db, { 'id' => round['id'], 'winner_id' => guest_id} )
+          elsif round_data['guest_choice'] == RockPaperScissors::SCISSORS
+            # Host Wins
+            RockPaperScissors::RoundsRepo.save(db, { 'id' => round['id'], 'winner_id' => host_id} )
+          end
+        elsif round_data['host_choice'] == RockPaperScissors::PAPER
+          if round_data['guest_choice'] == RockPaperScissors::ROCK
+            # Host Wins
+            RockPaperScissors::RoundsRepo.save(db, { 'id' => round['id'], 'winner_id' => host_id} )
+          elsif round_data['guest_choice'] == RockPaperScissors::SCISSORS
+            # Guest Wins
+            RockPaperScissors::RoundsRepo.save(db, { 'id' => round['id'], 'winner_id' => guest_id} )
+          end
+        elsif round_data['host_choice'] == RockPaperScissors::SCISSORS
+          if round_data['guest_choice'] == RockPaperScissors::PAPER
+            # Host Wins
+            RockPaperScissors::RoundsRepo.save(db, { 'id' => round['id'], 'winner_id' => host_id} )
+          elsif round_data['guest_choice'] == RockPaperScissors::ROCK
+            # Guest Wins
+            RockPaperScissors::RoundsRepo.save(db, { 'id' => round['id'], 'winner_id' => guest_id} )
+          end
+        end
+      end
+    end
   end
 
 end
