@@ -59,8 +59,8 @@ module RockPaperScissors
         end
         find(db, round_data['id'])
       else
-        sql = %q[INSERT INTO rounds (match_id) VALUES ($1, $2) RETURNING *]
-        db.exec(sql, [round_data['host_id'], round_data['guest_id']]).entries.first
+        sql = %q[INSERT INTO rounds (match_id) VALUES ($1) RETURNING *]
+        db.exec(sql, [round_data['match_id']]).entries.first
       end
     end
 
