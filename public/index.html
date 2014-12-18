@@ -7,7 +7,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="description" content="">
   <meta name="author" content="">
-    <title>Rock, Paper, Scissors</title>
+    <title>Rock, Paper, Scissors by Team Blue Barracuda</title>
   <!-- Bootstrap Core CSS -->
     <script src="js/jquery.js"></script>
     <script src="js/handlebars-v2.0.0.js"></script>
@@ -40,7 +40,7 @@
 <!-- scripts for templates -->
 <script id='log-in-template' type='text/x-handlebars-template'> 
     <div class="navbar-header">
-      <p class="navbar-brand">Rock, Paper, Scissors</p>                    
+      <p class="navbar-brand">Rock, Paper, Scissors by Team Blue Barracuda</p>                    
     </div>
     <div class="collapse navbar-collapse" id="signin-form" style='display:inline'>
       <input class="navbar-brand pull-right" type='password' id='pass' style='display:inline' placeholder='Password'></input>
@@ -48,9 +48,20 @@
       <a class="navbar-brand pull-right" href="#" id='login'>Login</a>
     </div>
   </script>
+
+<script id='load-buttons-template' type='text/x-handlebars-template'>
+  <div id='choice-buttons' class='btn-group btn-group-vertical'>
+    <button type="button" class="btn"><i class='glyphicon glyphicon-leaf' style="font-size:48px;"></i></button>
+    <button type="button" class="btn"><i class='glyphicon glyphicon-fire' style="font-size:48px;"></i></button>
+    <button type="button" class="btn"><i class='glyphicon glyphicon-tint' style="font-size:48px;"></i></button>
+  </div>
+</script>
+
 <script id='log-out-template' type='text/x-handlebars-template'>
     <div class="navbar-header">
-      <p id='home-navigate' class="navbar-brand">Rock, Paper, Scissors</p>
+      <li class="active">
+        <a href="#" id='home-navigate' class="navbar-brand">Rock, Paper, Scissors by Team Blue Barracuda</a>
+      </li>
     </div>
     <div class="collapse navbar-collapse pull-right" id="logout-link">
       <ul class="nav navbar-nav">
@@ -79,6 +90,7 @@
   </script>
 <script id='stats-page-template' type='text/x-handlebars-template'>
     <div class="container" id='player-choose'>
+      <button id='game-page'>REDIRECT TO GAME PAGE</button>
       <div class='row'>
         <div class='col-lg-4-offset2 text-center'>Please select a player</div>
         <div class='col-lg-3' id='player-drop-down'>text</div>
@@ -108,6 +120,11 @@
     <div class="row">
       <div class="col-lg-2 text-center">
         <h1>This is where we make the choice of R, P, S</h1>
+        <div id='choice-buttons' class='btn-group btn-group-vertical'>
+          <button type="button" class="btn"><i class='glyphicon glyphicon-leaf' style="font-size:48px;"></i></button>
+          <button type="button" class="btn"><i class='glyphicon glyphicon-fire' style="font-size:48px;"></i></button>
+          <button type="button" class="btn"><i class='glyphicon glyphicon-tint' style="font-size:48px;"></i></button>
+        </div>
       </div>
     <div class="col-lg-3 text-center">
       <h1>This will display game host name</h1>
@@ -196,6 +213,17 @@ $(document).on('click','#home-navigate', function(e) {
 $(document).on('click','#game-page', function(e) {
   e.preventDefault;
   $('#body-container').empty().append($('#game-page-template').html());
+  $('.glyphicon.glyphicon-leaf').css('color','green')
+  $('.glyphicon.glyphicon-fire').css('color','red')
+  $('.glyphicon.glyphicon-tint').css('color','blue')
+  $('.btn').hover(
+       function () {
+         $(this).css('background-color','black');
+       }, 
+      function () {
+          $(this).css('background-color','');
+       }
+     );
 })
 
 </script>
