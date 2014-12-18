@@ -100,7 +100,7 @@
        </div>
        <div class="col-lg-3 text-center">
           <h3>Your progress:</h3>
-          <p class="prog">Matches won:{{record['wins']}}</p>
+          <p class="prog">Matches won:{{record['wins']}}</p> // ALL OF THESE NEED HOOKUPS TO DB WITH DUMMY DATA.
           <p class="prog">Matches lost:{{record['loses']}}</p>
        </div>
        <div class="col-lg-3 text-center">
@@ -199,10 +199,20 @@ $(document).on('click','#logout', function(e) {
 
 $(document).on('click','#home-navigate', function(e) {
   e.preventDefault;
-  var source = $("#select").html();
-  var template = Handlebars.compile(source);
+  //user list
+  var list1 = $("#select").html();
+  var template1 = Handlebars.compile(list1);
+  //leaderboard
+  var list2 = $("#lead").html();
+  var template2 = Handlebars.compile(list2);
+  //current user record
+  var list3 = $("#prog").html();
+  var template3 = Handlebars.compile(list3);
+  //current matches
+  var list4 = $("#current").html();
+  var template4 = Handlebars.compile(list4);
 
-  var users = template({ // THIS NEEDS AN AJAX QUERY
+  var users = template1({ // THIS NEEDS AN AJAX QUERY
     user_id: 1,
     u: john
   });
