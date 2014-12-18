@@ -140,7 +140,7 @@
 <!-- js -->
 <script>
 function user_logged(user_name){
-   $('#navbar-container').append($('#log-out-template').html(user_name));
+   $('#navbar-container').empty().append($('#log-out-template').html());
 }
 $(document).ready(function(e){
   e.preventDefault;
