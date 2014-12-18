@@ -29,7 +29,7 @@ module RockPaperScissors
 
     def self.save db, match_data
         sql =<<-SQL 
-          INSERT INTO matches (host_id, guest_id) values ($1, $2)
+          INSERT INTO matches (host_id, guest_id) values ($1, $2) returning *
           SQL
         db.exec(sql, [match_data['host_id'], match_data['guest_id']]).entries
     end
