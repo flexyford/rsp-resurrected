@@ -32,6 +32,21 @@ module RockPaperScissors
       db.exec(sql, [user_id]).entries
     end
 
+    def self.user_match_record db, user_id
+      record = {}
+      sqlwin = %q[SELECT count(*) as count FROM matches 
+        where (host_id = $1 or guest_id = $1) 
+        and winner_id = $1]
+      sqllose = %q[SELECT count(*) as count FROM matches 
+        where (host_id = $1 or guest_id = $1) 
+        and (winner_id != $1 and winner_id is not null)]
+      wins = db.exec(sqlwin, [user_id]).entries.first
+      losses = db.exec(sqllose,[user_id]).entries.first
+      record["wins"] = wins["count"]
+      record["losses"] = losses["count"]
+      record
+    end
+
     def self.destroy db, match_id
       sql =%q[DELETE from rounds where match_id = $1]
       db.exec(sql,[match_id])

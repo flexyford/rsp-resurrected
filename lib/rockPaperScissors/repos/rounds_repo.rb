@@ -37,6 +37,32 @@ module RockPaperScissors
       db.exec(sql,[user_id])
     end
 
+     def self.user_round_record db, user_id
+      record = {}
+      sqlwin = %q[SELECT count(*) as count FROM rounds r
+        join matches m
+        on m.id = r.match_id
+        where (m.host_id = $1 or m.guest_id = $1) 
+        and r.winner_id = $1]
+      sqllose = %q[SELECT count(*) as count FROM rounds r
+        join matches m
+        on m.id = r.match_id
+        where (m.host_id = $1 or m.guest_id = $1) 
+        and (r.winner_id != $1 and r.winner_id is not null)]
+      sqldraw = %q[SELECT count(*) as count FROM rounds r
+        join matches m
+        on m.id = r.match_id
+        where (m.host_id = $1 or m.guest_id = $1) 
+        and r.winner_id is null]
+      wins = db.exec(sqlwin, [user_id]).entries.first
+      losses = db.exec(sqllose,[user_id]).entries.first
+      draws = db.exec(sqldraw,[user_id]).entries.first
+      record["wins"] = wins["count"]
+      record["losses"] = losses["count"]
+      record["draws"] = draws["count"]
+      record
+    end
+
     def self.find_by_match db, match_id
       sql = %q[SELECT * FROM rounds WHERE match_id = $1]
       db.exec(sql, [match_id]).entries
