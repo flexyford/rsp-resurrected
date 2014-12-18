@@ -59,7 +59,7 @@ module RockPaperScissors
           db.exec(sql, [round_data['id'], round_data['guest_choice']])
         end
         find(db, round_data['id'])
-      else
+      else #create new round, no moves made
         sql = %q[INSERT INTO rounds (match_id) VALUES ($1) RETURNING *]
         db.exec(sql, [round_data['match_id']]).entries.first
       end

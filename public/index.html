@@ -42,9 +42,9 @@
     <div class="navbar-header">
       <p class="navbar-brand">Rock, Paper, Scissors</p>                    
     </div>
-    <div class="collapse navbar-collapse" id="signin-form">
-      <input class="navbar-brand pull-right" type='password' id='pass' placeholder='Password'></input>
-      <input class="navbar-brand pull-right" type='text' id='user' placeholder='Username'></input>
+    <div class="collapse navbar-collapse" id="signin-form" style='display:inline'>
+      <input class="navbar-brand pull-right" type='password' id='pass' style='display:inline' placeholder='Password'></input>
+      <input class="navbar-brand pull-right" type='text' id='user' style='display:inline' placeholder='Username'></input>
       <a class="navbar-brand pull-right" href="#" id='login'>Login</a>
     </div>
   </script>
@@ -62,13 +62,18 @@
   </script>
 <script id='signup-page-template' type='text/x-handlebars-template'>
     <div class="container" id="signup-container">
-      <div class="col-lg-2 text-center">
-        <h1>A Bootstrap Starter Template</h1>
+      <div class="col-lg-12 text-center">
+        <h1>Please sign up if you do not have an account</h1>
         <p class="lead">LOG IN PAGE</p>
-        <ul class="list-unstyled">
-          <li>Bootstrap v3.3.1</li>
-          <li>jQuery v1.11.1</li>
-        </ul>
+        <form id='signup' style='display:inline'>
+        <input id='username' placeholder='Username' type='text'></input>
+        <br>
+        <input id='password' placeholder='Enter Password' type='password'></input>
+        <br>
+        <input id='password2' placeholder='Enter Password Again' type='password'></input>
+        <br>
+        <a href="#" id='signup_link'>Sign Up</a>
+        </form>
       </div>
     </div>
   </script>
@@ -137,6 +142,7 @@
 $(document).ready(function(e){
   e.preventDefault;
   $('#navbar-container').append($('#log-in-template').html());
+  $('#body-container').append($('#signup-page-template').html());
 })
 
 
@@ -150,7 +156,7 @@ $(document).on('click','#login', function(e) {
   };
   console.log(userInfo)
   $.ajax({
-    //put ajax carp here
+    //put ajax crap here
   }) 
 })
 

@@ -32,6 +32,12 @@ module RockPaperScissors
       db.exec(sql, [user_id]).entries
     end
 
+    def self.destroy db, match_id
+      sql =%q[DELETE from rounds where match_id = $1]
+      db.exec(sql,[match_id])
+      sql2 = %q[DELETE FROM matches where id = $1]
+      db.exec(sql2,[match_id])
+    end
 
     def self.save db, match_data
 
