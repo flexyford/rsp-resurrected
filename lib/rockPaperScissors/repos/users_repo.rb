@@ -1,10 +1,16 @@
 
 require 'securerandom'
 require 'pg'
+require 'pry-byebug'
 
 module RockPaperScissors
 
   class UsersRepo
+
+    def self.all(db)
+      db.exec("SELECT * FROM users").to_a
+    end
+
     def self.find db, user_id
       sql = %q[SELECT * FROM users WHERE id = $1]
       result = db.exec(sql, [user_id])
@@ -33,9 +39,22 @@ module RockPaperScissors
     end
 
     def self.save db, user_data
-      sql = %q[INSERT INTO users (username, password) VALUES ($1, $2) RETURNING *]
-      result = db.exec(sql, [user_data[:username], user_data[:password]])
-      result.first
+      if user_data['id']
+        # Update Username
+        if user_data['username']
+          sql = %q[UPDATE users SET username = $2 WHERE id = $1 RETURNING *]
+          db.exec(sql, [user_data['id'], user_data['username']])
+        end
+        # Update Password
+        if user_data['password']
+          sql = %q[UPDATE users SET password = '$2' WHERE id = $1 RETURNING *]
+          db.exec(sql, [user_data['id'], user_data['password']])
+        end
+      else
+        sql = %q[INSERT INTO users (username, password) VALUES ($1, $2) RETURNING *]
+        user_data['id'] = db.exec(sql, [user_data['username'], user_data['password']]).entries.first['id']
+      end
+      find(db, user_data['id'])
     end
 
     def self.sign_in db, id

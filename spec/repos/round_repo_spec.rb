@@ -18,7 +18,7 @@ describe RockPaperScissors::RoundsRepo do
   # Before each 'it' block we are clearing the data base
   # That way when we crete users we know exactly how many should be in the db
   before(:each) do
-    RockPaperScissors.clear_db(db)
+    RockPaperScissors.clear(db)
     RockPaperScissors.create_tables(db)
     user1 = db.exec("INSERT INTO users (username, password) VALUES ($1, $2)", ["Alice", "password1"])
     user2 = db.exec("INSERT INTO users (username, password) VALUES ($1, $2)", ["Bob", "password2"])

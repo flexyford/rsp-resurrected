@@ -2,6 +2,11 @@ require 'pg'
 
 module RockPaperScissors
   class MatchesRepo
+
+    def self.all(db)
+      db.exec("SELECT * FROM matches").to_a
+    end
+
     def self.find db, match_id
       sql = %q[SELECT * FROM matches WHERE id = $1]
       result = db.exec(sql, [match_id])
