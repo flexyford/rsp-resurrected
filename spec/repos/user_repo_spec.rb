@@ -77,6 +77,12 @@ describe RockPaperScissors::UsersRepo do
     expect(user_count(db)).to eq 0
   end
 
+  it "sign in user" do
+    user = RockPaperScissors::UsersRepo.save db, { 'username' => "Alice", 'password' => "password1" }
+    token = RockPaperScissors::UsersRepo.sign_in db, user['id']
+    expect(token).to_not be_nil
+  end
+
   xit "check user records" do
     # Init Users
     host = RockPaperScissors::UsersRepo.save db, { 'username' => "Alice", 'password' => "password1" }

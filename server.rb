@@ -114,7 +114,13 @@ class RockPaperScissors::Server < Sinatra::Application
 
   # GET  /users  : This endpoint will allow you to receive users from the server.
   #     Params : None.
-  #     Return : An Array of Hashes containing user_data
+  #     Return : An Array containing user_ids
+  #              [
+  #                user_data { 
+  #                  'user_id' => INTEGER user_id
+  #                  'username' => STRING username
+  #                }
+  #              ]
   GET '/users' do
 
   end
@@ -122,13 +128,20 @@ class RockPaperScissors::Server < Sinatra::Application
   # GET  /users/:user_id  : This endpoint will allow you to receive users from the server.
   #     Params : None.
   #     Return : An Hash containing user_data for user_id
+  #              user_data {
+  #                 'username' => STRING username
+  #                 'win'      => INTEGER num of wins
+  #                 'loss'     => INTEGER num of losses
+  #                 'draw'     => INTEGER num of draws      
+  #              }
   GET '/users/:user_id' do
 
   end
 
   # GET  /users/:user_id/matches  : This endpoint will allow you to receive users from the server.
   #     Params : None.
-  #     Return : An Array of Hashes containing matches_data for user_id
+  #     Return : An Hash containing match_ids of all matches
+  #              [INTEGER match_ids]
   GET '/users/:user_id/matches' do
 
   end
@@ -136,13 +149,14 @@ class RockPaperScissors::Server < Sinatra::Application
   # GET  /users/:user_id/matches  : This endpoint will allow you to receive users from the server.
   #     Params : None.
   #     Return : An Array of Hashes containing rounds_data for user_id
-  GET '/users/:user_id/rounds' do
+  # GET '/users/:user_id/rounds' do
 
-  end
+  # end
 
   # GET  /matches  : This endpoint will allow you to receive matches from the server.
   #     Params : None.
-  #     Return : An Array of Hashes containing match_data
+  #     Return : An Hash containing match_ids of all matches
+  #              [INTEGER match_ids]
   GET '/matches' do
 
   end
@@ -158,13 +172,25 @@ class RockPaperScissors::Server < Sinatra::Application
   # GET  /matches/:match_id  : This endpoint will allow you to receive match_data for match_id from the server.
   #     Params : None.
   #     Return : A Hash containing match_data for match_id
+  #                hash { 
+  #                  'host_id'   => INTEGER host_id
+  #                  'guest_d'   => INTEGER guest_id
+  #                  'winner_id' => INTEGER winner_id
+  #                  'rounds'    => [INTEGER round_ids] # An Array of rounds for that :match_id
+  #                }
   GET '/matches/:match_id' do
 
   end
 
   # PUT  /matches:match_id  : This endpoint will allow you to update the winner of match_id on the server.
-  #     Params : `winner_name` - The username of the decalred winner; Expecting Host or Guest of Match
+  #     Params : `winner_id` - The id of the decalred winner; Expecting Host or Guest of Match
   #     Return : A Hash containing match_data for match_id
+  #                match_data { 
+  #                  'host_id'   => INTEGER host_id
+  #                  'guest_d'   => INTEGER guest_id
+  #                  'winner_id' => INTEGER winner_id
+  #                  'rounds'    => [INTEGER round_ids] # An Array of rounds for that :match_id
+  #                }
   PUT '/matches/:match_id' do
 
   end
@@ -178,7 +204,8 @@ class RockPaperScissors::Server < Sinatra::Application
 
   # GET  /rounds  : This endpoint will allow you to receive rounds from the server.
   #     Params : None.
-  #     Return : An Array of Hashes containing round_data
+  #     Return : An Array containing round_data for all rounds
+  #              [INTEGER round_ids]
   GET '/rounds' do
 
   end
@@ -186,6 +213,12 @@ class RockPaperScissors::Server < Sinatra::Application
   # GET  /rounds:round_id  : This endpoint will allow you to receive round_data for round_id from the server.
   #     Params : None.
   #     Return : A Hash containing round_data for round_id
+  #                round_data { 
+  #                  'match_id'     => INTEGER match_id
+  #                  'host_choice'  => VARCHAR 'r'/'p'/'s'
+  #                  'guest_choice' => VARCHAR 'r'/'p'/'s'
+  #                  'winner_id'    => INTEGER winner_id
+  #                }
   GET '/rounds/:round_id' do
 
   end
@@ -193,7 +226,13 @@ class RockPaperScissors::Server < Sinatra::Application
   # PUT  /rounds:round_id  : This endpoint will allow you to update round_data for round_id on the server.
   #     Params : `apiToken` - The api token of the signed in user; Expecting Host or Guest of Match
   #              'user_choice' - The choice that the currently signed-in user makes
-  #     Return : A Hash containing round_data for round_id (Winner is updated server-side)
+  #     Return : A Hash containing round_data for round_id
+  #                round_data { 
+  #                  'match_id'     => INTEGER match_id
+  #                  'host_choice'  => VARCHAR 'r'/'p'/'s'
+  #                  'guest_choice' => VARCHAR 'r'/'p'/'s'
+  #                  'winner_id'    => INTEGER winner_id
+  #                }
   PUT '/rounds/:round_id' do
 
   end
