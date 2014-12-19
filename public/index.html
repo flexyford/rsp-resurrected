@@ -117,9 +117,11 @@
        </div>
        <div class="col-lg-3 text-center" id='current'>
          <h3>Current games:</h3>
-         {{#each data}}
-         <p class="current"><a href='#'>Match:{{this.id}}</a></p>
+         <script id='test' >
+         {{#each id}}
+         <p class="current" id='matches'><a href='#'>Match:{{this.id}}</a></p>
          {{/each}} 
+         </script>
        </div>
        <div class="col-lg-2 text-center">
        </div>
@@ -383,43 +385,23 @@ $(document).on('click','#logout', function(e) {
 
 $(document).on('click','#home-navigate', function(e) {
   e.preventDefault;
-  /*
-  //user list
-  var list1 = $("#select").html();
-  var template1 = Handlebars.compile(list1);
-  //leaderboard
-  var list2 = $("#lead").html();
-  var template2 = Handlebars.compile(list2);
-  //current user record
-  var list3 = $("#prog").html();
-  var template3 = Handlebars.compile(list3);
-  //current matches
-  var list4 = $("#current").html();
-  var template4 = Handlebars.compile(list4);
-
-  var users = template1({ // THIS NEEDS AN AJAX QUERY
-    user_id: 1,
-    u: john
-  }); */
 //current matches
-  var list4 = $("#current").html();
-  var template4 = Handlebars.compile(list4);
+  var list4 = $("#test").html();
+  var template4 = Handlebars.compile(list4);  
    $.ajax({
-      url: '/users/'+user_id+'/matches', 
+      url: '/users/'+localStorage.user_id+'/matches', 
       type: 'GET',
       success: function(data) {
-        return data
-          if matches.winner_id = null{
-          var html = template({
-            id: matches.id
+        console.log(data);
+          var html = template4({
+            id: data.id
           })
-          $('.current').append(html)
+          console.log(html);
+          $('#current').append(html)
         }
-      }
-    })
-   
-
+      })
 })
+
 
 $(document).on('click','#game-start', function(e) {
   e.preventDefault;
