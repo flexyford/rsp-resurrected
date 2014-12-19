@@ -78,7 +78,7 @@ class RockPaperScissors::Server < Sinatra::Application
     end
 
     if errors.count == 0
-      user_data = {username: params[:username], password: params[:password]}
+      user_data = {'username' => params[:username], 'password' => params[:password]}
       user = RockPaperScissors::UsersRepo.save db, user_data
       # session[:user_id] = user['id']
       status 200
