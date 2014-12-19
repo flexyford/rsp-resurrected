@@ -128,6 +128,12 @@
 </script>
 <script id='game-page-template' type='text/x-handlebars-template'>
   <div class="container" id="game-container">
+    <div class="row text-center">
+      <h2>
+      <ul>Current Match: <span id=curr_match>{{match_id}}</span></ul>
+      <ul>Current Round: <span id=curr_round>{{round_id}}</span></ul>
+      </h2>
+    </div>
     <div class="row">
       <div class="col-lg-2 text-center">
         
@@ -197,6 +203,17 @@ function load_stats(user_id){
     });
 }
 
+function send_choice(token, round_id, match_id){
+  $.ajax({
+      url: '/rounds/' + round_id, 
+      type: 'PUT',
+      data: {},
+      success: function(data) {
+        
+      }
+    });
+}
+
 function load_users(){
   $.ajax({
       url: '/users', 
@@ -229,7 +246,9 @@ function load_turn(round_data){
     type: 'GET', 
     success: function(returned) {
       var myNewHTML = template({
-        opponent: returned.username
+        opponent: returned.username,
+        match_id: round_data.id,
+        round_id: round_data.rounds.length
       });
       $('#body-container').append(myNewHTML)
       $('.glyphicon.glyphicon-leaf').css('color','green')
