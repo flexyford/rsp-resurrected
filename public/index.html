@@ -115,7 +115,7 @@
          // <p class="prog">Matches lost:{{losses}}</p> 
            // {{/with}}-->
        </div>
-       <div class="col-lg-3 text-center">
+       <div class="col-lg-3 text-center" id='current'>
          <h3>Current games:</h3>
          {{#each data}}
          <p class="current"><a href='#'>Match:{{this.id}}</a></p>
@@ -357,6 +357,12 @@ $(document).on('click','#home-navigate', function(e) {
       type: 'GET',
       success: function(data) {
         return data
+          if matches.winner_id = nil{
+          var html = template({
+            id: matches.id
+          })
+          $('.current').append(html)
+        }
       }
     })
 })
