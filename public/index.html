@@ -191,11 +191,20 @@ $(document).on('click','#signup_link', function(e) {
     'password': password
   };
   user_logged(username)
-}
+  $.ajax({
+      url: '/signup', 
+      type: 'POST',
+      data: userInfo,
+      success: function(data) {
+      alert("Successfully Signed Up")
+      }
+    })
+  }
 })
 
 $(document).on('click','#login', function(e) {
   e.preventDefault;
+  localStorage.delete;
   var username = document.getElementById('user').value;
   var password = document.getElementById('pass').value;
   var userInfo = {
@@ -205,6 +214,15 @@ $(document).on('click','#login', function(e) {
   user_logged(username);
   $.ajax({
     //put ajax crap here
+    url: '/signin',//needs to point to endpoint
+    type: 'POST', 
+    data: userInfo,
+    success: function(returned) {
+      console.log(returned);
+      localStorage.setItem('token', returned['token']);
+      localStorage.setItem('user_id', returned['id']);
+      alert('Logged in!!')
+    }
   }) 
 })
 

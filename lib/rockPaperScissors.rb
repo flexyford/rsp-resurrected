@@ -64,9 +64,24 @@ module RockPaperScissors
   end
 
   def self.seed_dummy_users db
-    db.exec <<-SQL
-      INSERT INTO users (username, password)
-      VALUES ('nick','nick'), ('kate','kate');
-    SQL
+
+    # Seed Users
+    user1 = RockPaperScissors::UsersRepo.save db, { 'username' => "alex",  'password' => "password1" }
+    user2 = RockPaperScissors::UsersRepo.save db, { 'username' => "jason", 'password' => "password2" }
+    user3 = RockPaperScissors::UsersRepo.save db, { 'username' => "john",  'password' => "password3" }
+    user4 = RockPaperScissors::UsersRepo.save db, { 'username' => "julia", 'password' => "password4" }
+
+    # Seed Matches
+    match1a = RockPaperScissors::MatchesRepo.save(db, { 'host_id' => user1['id'], 'guest_id' => user2['id'] })
+    match2a = RockPaperScissors::MatchesRepo.save(db, { 'host_id' => user2['id'], 'guest_id' => user3['id'] })
+    match3a = RockPaperScissors::MatchesRepo.save(db, { 'host_id' => user3['id'], 'guest_id' => user4['id'] })
+    match4a = RockPaperScissors::MatchesRepo.save(db, { 'host_id' => user4['id'], 'guest_id' => user1['id'] })
+
+    # Seed Rounds
+    round1a = RockPaperScissors::RoundsRepo.save(db, {'match_id' => match1a['id']} )
+    round2a = RockPaperScissors::RoundsRepo.save(db, {'match_id' => match2a['id']} )
+    round3a = RockPaperScissors::RoundsRepo.save(db, {'match_id' => match3a['id']} )
+    round4a = RockPaperScissors::RoundsRepo.save(db, {'match_id' => match4a['id']} )
+
   end
 end
