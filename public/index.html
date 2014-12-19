@@ -118,9 +118,7 @@
        <div class="col-lg-3 text-center" id='current'>
          <h3>Current games:</h3>
          <script type="text/x-handlebars-template" id='test'>
-         {{#each data}}
          <a href='#'>Match:{{this.id}}</a>
-         {{/each}} 
          </script>
        </div>
        <div class="col-lg-2 text-center">
@@ -392,12 +390,15 @@ $(document).on('click','#home-navigate', function(e) {
       url: '/users/'+localStorage.user_id+'/matches', 
       type: 'GET'
     }).done(function(data) {
-        console.log(data);
+        console.log(data['active'])
+        var ids = data['active']
+        for(var i=0;i<ids;i++){
         var html = template4({
-            id: data.id
+            id: data['active'][i]
           })
         console.log(html);
         $('#current').append(html)
+      }
       })
   })
 
