@@ -1,6 +1,5 @@
 require 'sinatra'
-# require 'sinatra/reloader'
-require 'rest-client'
+require 'sinatra/reloader'
 require 'json'
 require 'pry-byebug'
 
@@ -12,7 +11,7 @@ class RockPaperScissors::Server < Sinatra::Application
 
   # use thin instead of webrick
   configure do
-    enable :sessions
+    # enable :sessions
     set server: 'thin'
   end
 
@@ -58,6 +57,7 @@ class RockPaperScissors::Server < Sinatra::Application
   ############ MAIN ROUTES ###############
 
   get '/' do
+    headers['Content-Type'] = 'text/html'
     send_file 'public/index.html'
   end
 
@@ -80,7 +80,7 @@ class RockPaperScissors::Server < Sinatra::Application
     if errors.count == 0
       user_data = {username: params[:username], password: params[:password]}
       user = RockPaperScissors::UsersRepo.save db, user_data
-      session[:user_id] = user['id']
+      # session[:user_id] = user['id']
       status 200
       '{}'
     else
@@ -93,11 +93,18 @@ class RockPaperScissors::Server < Sinatra::Application
   #              `password` - The password of the user signing in
   #    Returns : An `token` to make future authorized requests with.
   post '/signin' do
+    errors = []
     user = RockPaperScissors::UsersRepo.find_by_name db, params[:username]
 
-    if user && user['password'] == params[:password]
-      token = RockPaperScissors::UsersRepo.sign_in db, user['id']
-      { token: token }.to_json
+    if user
+      if user['password'] == params[:password]
+        token = RockPaperScissors::UsersRepo.sign_in db, user['id']
+        { token: token }.to_json
+      else
+        status 401
+        errors << "invalid password"
+        { errors: errors }.to_json
+      end
     else
       status 401
     end
@@ -150,7 +157,7 @@ class RockPaperScissors::Server < Sinatra::Application
         'username' => user['username'],
         'wins' => record['wins'],
         'losses' => record['losses']
-      }
+      }.to_json
     else
       errors << 'user not found'
       status 401
@@ -160,18 +167,18 @@ class RockPaperScissors::Server < Sinatra::Application
 
   # get  /users/:user_id/matches  : This endpoint will allow you to receive users from the server.
   #     Params : None.
-  #     Return : An Hash containing match_ids of all matches
-  #              [INTEGER match_ids]
+  #     Return : A Hash containing keys whose values are arrays
+  #              {
+  #                'active'   => [match_ids of all currently active matches]
+  #                'complete' => [match_ids of all completed matches]
+  #              }
   get '/users/:user_id/matches' do
     user = RockPaperScissors::UsersRepo.find(db, params[:user_id])
     if user
-      matches = RockPaperScissors::MatchesRepo.find_by_user(db, user['id'])
+      active = RockPaperScissors::MatchesRepo.find_active_by_user(db, user['id']) || []
+      complete = RockPaperScissors::MatchesRepo.find_complete_by_user(db, user['id']) || []
       status 200
-      if !matches.nil?
-        matches.map {|m| m['id'] }.to_json
-      else
-        '[]'
-      end
+      { 'active' => active.map! {|m| m['id'] }, 'complete' => complete.map! {|m| m['id'] } }.to_json
     else
       errors << 'user not found'
       status 401
@@ -203,22 +210,20 @@ class RockPaperScissors::Server < Sinatra::Application
   # POST  /matches  : This endpoint will allow you to create a new match and new round for that match
   #     Params : `token` - The api token of the signed in user.
   #              `guest_name` - The username of the challenged guest
-  #     Return : A Hash containing { 'match_id' => match_id, 'round_id' => round_id}
+  #     Return : A Hash containing { 'match_id' => match_id}
   post '/matches' do
     errors = []
     host = RockPaperScissors::UsersRepo.find_by_token(db, params[:token])
     guest = RockPaperScissors::UsersRepo.find_by_name(db, params[:guest_name])
 
-    if host && (session[:user_id] == host['id']) && guest
+    if host && guest
       # Update Round
       if guest
         # Create Match
         match = RockPaperScissors::MatchesRepo.save(db, { 'host_id' => host['id'], 'guest_id' => guest['id'] })
-        # Create Round
-        round = RockPaperScissors::RoundsRepo.save(db, {'match_id' => match['id']} )
+
         {
-          'match_id' => match['id'],
-          'round_id' => round['id']
+          'match_id' => match['id']
         }.to_json     
       else
         errors << 'user is not a valid guest'
@@ -247,6 +252,37 @@ class RockPaperScissors::Server < Sinatra::Application
     match = RockPaperScissors::MatchesRepo.find(db, params[:match_id])
     rounds = RockPaperScissors::RoundsRepo.find_by_match(db, params[:match_id])
     if match
+        {
+          'id' => match['id'],
+          'host_id' => match['host_id'],
+          'guest_id' => match['guest_id'],
+          'winner_id' => match['winner_id'],
+          'rounds' => rounds
+        }.to_json
+    else
+      errors << 'match not found'
+      status 401
+      { errors: errors }.to_json
+    end
+  end
+
+  # post  /matches/:match_id  : This endpoint will create a new round for :match_id
+  #     Params : None.
+  #     Return : A Hash containing match_data for match_id
+  #                match_data {
+  #                  'id'        => INTEGER match_id 
+  #                  'host_id'   => INTEGER host_id
+  #                  'guest_d'   => INTEGER guest_id
+  #                  'winner_id' => INTEGER winner_id
+  #                  'rounds'    => [INTEGER round_ids] # An Array of rounds for that :match_id
+  #                }
+  post '/matches/:match_id' do
+    errors = []
+    match = RockPaperScissors::MatchesRepo.find(db, params[:match_id])
+    if match
+        # Create Round
+        round = RockPaperScissors::RoundsRepo.save(db, {'match_id' => match['id']} )
+        rounds = RockPaperScissors::RoundsRepo.find_by_match(db, params[:match_id])
         {
           'id' => match['id'],
           'host_id' => match['host_id'],
@@ -302,11 +338,11 @@ class RockPaperScissors::Server < Sinatra::Application
   #     Returns : An empty 200 response.
   delete '/matches/:match_id' do
     user = RockPaperScissors::UsersRepo.find_by_token(db, params[:token])
-    if user && (session[:user_id] == user['id'])
+    if user
       match = RockPaperScissors::MatchesRepo.find(db, params[:match_id])
       rounds = RockPaperScissors::RoundsRepo.find_by_match(db, params[:match_id])
-      if (user['id'] == match['host_id'] || user['id'] == match['guest_id']) && 
-        RockPaperScissors::MatchesRepo.destory(db, match['id'])
+      if (user['id'] == match['host_id'] || user['id'] == match['guest_id'])
+        RockPaperScissors::MatchesRepo.destory(db, match['id']).to_json
       else
         errors << 'user is not a host or guest for this match'
         status 400
@@ -345,10 +381,9 @@ class RockPaperScissors::Server < Sinatra::Application
   #                  'winner_id'    => INTEGER winner_id
   #                }
   get '/rounds/:round_id' do
-    round_id = params[:round_id]
-    round = RockPaperScissors::RoundsRepo.find(db, round['id'])
+    round = RockPaperScissors::RoundsRepo.find(db, params[:round_id])
     if round
-      round
+      round.to_json
     else
       errors << 'round not found'
       status 401
@@ -372,7 +407,7 @@ class RockPaperScissors::Server < Sinatra::Application
     errors = []
     user = RockPaperScissors::UsersRepo.find_by_token(db, params[:token])
     
-    if user && (session[:user_id] == user['id'])
+    if user
       # Update Round
       round = RockPaperScissors::RoundsRepo.find(db, params[:round_id])
       match = RockPaperScissors::MatchesRepo.find(db, round['match_id'])
@@ -380,10 +415,10 @@ class RockPaperScissors::Server < Sinatra::Application
 
         if user['id'] == match['host_id']
           round = RockPaperScissors::RoundsRepo.save(db, { 'id' => round['id'], 'host_choice' => params[:user_choice]} )
-          updateRoundWinner(round, match['host_id'], match['guest_id'])
+          updateRoundWinner(round, match['host_id'], match['guest_id']).to_json
         elsif user['id'] == match['guest_id']
           round = RockPaperScissors::RoundsRepo.save(db, { 'id' => round['id'], 'guest_choice' => params[:user_choice]} )
-          updateRoundWinner(round, match['host_id'], match['guest_id'])
+          updateRoundWinner(round, match['host_id'], match['guest_id']).to_json
         else
           errors << 'user is not a hot or guest for this round'
           status 400
@@ -407,30 +442,31 @@ class RockPaperScissors::Server < Sinatra::Application
         if round_data['host_choice'] == RockPaperScissors::ROCK
           if round_data['guest_choice'] == RockPaperScissors::PAPER
             # Guest Wins
-            RockPaperScissors::RoundsRepo.save(db, { 'id' => round['id'], 'winner_id' => guest_id} )
+            RockPaperScissors::RoundsRepo.save(db, { 'id' => round_data['id'], 'winner_id' => guest_id} )
           elsif round_data['guest_choice'] == RockPaperScissors::SCISSORS
             # Host Wins
-            RockPaperScissors::RoundsRepo.save(db, { 'id' => round['id'], 'winner_id' => host_id} )
+            RockPaperScissors::RoundsRepo.save(db, { 'id' => round_data['id'], 'winner_id' => host_id} )
           end
         elsif round_data['host_choice'] == RockPaperScissors::PAPER
           if round_data['guest_choice'] == RockPaperScissors::ROCK
             # Host Wins
-            RockPaperScissors::RoundsRepo.save(db, { 'id' => round['id'], 'winner_id' => host_id} )
+            RockPaperScissors::RoundsRepo.save(db, { 'id' => round_data['id'], 'winner_id' => host_id} )
           elsif round_data['guest_choice'] == RockPaperScissors::SCISSORS
             # Guest Wins
-            RockPaperScissors::RoundsRepo.save(db, { 'id' => round['id'], 'winner_id' => guest_id} )
+            RockPaperScissors::RoundsRepo.save(db, { 'id' => round_data['id'], 'winner_id' => guest_id} )
           end
         elsif round_data['host_choice'] == RockPaperScissors::SCISSORS
           if round_data['guest_choice'] == RockPaperScissors::PAPER
             # Host Wins
-            RockPaperScissors::RoundsRepo.save(db, { 'id' => round['id'], 'winner_id' => host_id} )
+            RockPaperScissors::RoundsRepo.save(db, { 'id' => round_data['id'], 'winner_id' => host_id} )
           elsif round_data['guest_choice'] == RockPaperScissors::ROCK
             # Guest Wins
-            RockPaperScissors::RoundsRepo.save(db, { 'id' => round['id'], 'winner_id' => guest_id} )
+            RockPaperScissors::RoundsRepo.save(db, { 'id' => round_data['id'], 'winner_id' => guest_id} )
           end
         end
       end
     end
+    RockPaperScissors::RoundsRepo.find(db, round_data['id'])
   end
 
 end
