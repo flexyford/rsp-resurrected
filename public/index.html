@@ -51,9 +51,9 @@
 
 <script id='load-buttons-template' type='text/x-handlebars-template'>
   <div id='choice-buttons' class='btn-group btn-group-vertical'>
-    <button type="button" class="btn"><i class='glyphicon glyphicon-leaf' style="font-size:48px;"></i></button>
-    <button type="button" class="btn"><i class='glyphicon glyphicon-fire' style="font-size:48px;"></i></button>
-    <button type="button" class="btn"><i class='glyphicon glyphicon-tint' style="font-size:48px;"></i></button>
+    <button type="button" name='p' class="btn"><i class='glyphicon glyphicon-leaf' style="font-size:48px;"></i></button>
+    <button type="button" name='s' class="btn"><i class='glyphicon glyphicon-fire' style="font-size:48px;"></i></button>
+    <button type="button" name='r' class="btn"><i class='glyphicon glyphicon-tint' style="font-size:48px;"></i></button>
   </div>
 </script>
 
@@ -131,7 +131,7 @@
     <div class="row text-center">
       <h2>
       <ul>Current Match: <span id=curr_match>{{match_id}}</span></ul>
-      <ul>Current Round: <span id=curr_round>{{round_id}}</span></ul>
+      <ul>Current Round: <span id='curr_round' name={{round_id}}>{{round_num}}</span></ul><span id=curr_round>
       </h2>
     </div>
     <div class="row">
@@ -141,16 +141,21 @@
     <div id='user-choice' class="col-lg-3 text-center">
       <h1>Your Choice?</h1>
       <div id='choice-buttons' class='btn-group btn-group-vertical'>
-          <button type="button" class="btn"><i class='glyphicon glyphicon-leaf' style="font-size:60px;"></i></button>
-          <button type="button" class="btn"><i class='glyphicon glyphicon-fire' style="font-size:60px;"></i></button>
-          <button type="button" class="btn"><i class='glyphicon glyphicon-tint' style="font-size:60px;"></i></button>
+          <button type="button" name='p' class="btn"><i class='glyphicon glyphicon-leaf' style="font-size:48px;"></i></button>
+          <button type="button" name='s' class="btn"><i class='glyphicon glyphicon-fire' style="font-size:48px;"></i></button>
+          <button type="button" name='r' class="btn"><i class='glyphicon glyphicon-tint' style="font-size:48px;"></i></button>
       </div>
     </div>
     <div id='center-container' class="col-lg-2 text-center">
       <!-- display game winner name... have popup for Match Won?-->
 
-      <h1>VS / WINNER</h1>
+      <h1>VS</h1>
       <img style="width:180px" src="http://static.tvtropes.org/pmwiki/pub/images/Pokemon_1stGen_RPS_8415.jpg" border="0" alt="Fire beats Grass, Grass Beats Water, Water beats Fire"></img>
+
+      {{#each rounds_info}}
+        <p>{{this.id}} -- {{this.match_id}} -- {{this.host_choice}} -- {{this.guest_choice}} -- {{this.winner_id}}<p>
+      {{/each}}
+
     </div>
     <div id='opponent-choice' class="col-lg-3 text-center">
       <h1>{{opponent}}</h1>
@@ -203,13 +208,12 @@ function load_stats(user_id){
     });
 }
 
-function send_choice(token, round_id, match_id){
+function send_choice(token, round_id, choice){
   $.ajax({
       url: '/rounds/' + round_id, 
       type: 'PUT',
-      data: {},
+      data: {'token' : token, 'user_choice' : choice},
       success: function(data) {
-        
       }
     });
 }
@@ -224,6 +228,16 @@ function load_users(){
     });
 }
 
+function check_round(match_id){
+  $.ajax({
+      url: '/matches/' + match_id, 
+      type: 'GET',
+      success: function(data) {
+        load_turn(data)
+      }
+    });
+}
+
 function next_round(match_id){
   $.ajax({
       url: '/matches/'+match_id+'/rounds', 
@@ -234,8 +248,14 @@ function next_round(match_id){
     });
 }
 
-function load_turn(round_data){
-  
+function load_turn(round_data){ //should check state of round or declare winner
+  var current_round_id;
+  round_data.rounds.forEach(function(r){
+    console.log(r)
+    if (r.winner_id == null){
+      current_round_id = r.id;
+    }
+  })
  $('#body-container').empty()
   var source = $('#game-page-template').html()
   var template = Handlebars.compile(source);
@@ -245,10 +265,13 @@ function load_turn(round_data){
     url: '/users/' + round_data.guest_id,
     type: 'GET', 
     success: function(returned) {
+
       var myNewHTML = template({
         opponent: returned.username,
         match_id: round_data.id,
-        round_id: round_data.rounds.length
+        round_id: current_round_id,
+        round_num: round_data.rounds.length,
+        rounds_info: round_data.rounds
       });
       $('#body-container').append(myNewHTML)
       $('.glyphicon.glyphicon-leaf').css('color','green')
@@ -325,7 +348,6 @@ $(document).on('click','#login', function(e) {
       localStorage.setItem('token', returned['token']);
       localStorage.setItem('user_id', returned['id']);
       alert('Logged in!!')
-      console.log(username);
       user_logged(username);
     }
   }) 
@@ -338,7 +360,6 @@ $(document).on('click','#logout', function(e) {
     type: 'DELETE', 
     data: {'token' : localStorage.token},
     success: function(returned) {
-      console.log(returned);
       localStorage.delete;
       alert('Logged Out')
       $('#navbar-container').empty().append($('#log-in-template').html());
@@ -390,6 +411,16 @@ $(document).on('click','#game-start', function(e) {
       next_round(r['match_id'])
     }
   })
+})
+
+$(document).on('click','.btn', function(e) {
+  e.preventDefault;
+  var t = localStorage.token;
+  var r = $('#curr_round').attr('name'); //round_id
+  var c = $(e.currentTarget).attr('name')//choice
+  send_choice(t, r, c)
+  var m = $('#curr_match').text()//current match id
+  check_round(m)
 })
 
 </script>
