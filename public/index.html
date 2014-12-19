@@ -117,9 +117,9 @@
        </div>
        <div class="col-lg-3 text-center" id='current'>
          <h3>Current games:</h3>
-         <script id='test' >
-         {{#each id}}
-         <p class="current" id='matches'><a href='#'>Match:{{this.id}}</a></p>
+         <script type="text/x-handlebars-template" id='test'>
+         {{#each data}}
+         <a href='#'>Match:{{this.id}}</a>
          {{/each}} 
          </script>
        </div>
@@ -377,18 +377,16 @@ $(document).on('click','#home-navigate', function(e) {
   var template4 = Handlebars.compile(list4);  
    $.ajax({
       url: '/users/'+localStorage.user_id+'/matches', 
-      type: 'GET',
-      success: function(data) {
+      type: 'GET'
+    }).done(function(data) {
         console.log(data);
-          var html = template4({
+        var html = template4({
             id: data.id
           })
-          console.log(html);
-          $('#current').append(html)
-        }
+        console.log(html);
+        $('#current').append(html)
       })
   })
-
 $(document).on('click','#game-start', function(e) {
   e.preventDefault;
   $.ajax({
