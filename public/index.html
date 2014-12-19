@@ -117,9 +117,9 @@
        </div>
        <div class="col-lg-3 text-center">
          <h3>Current games:</h3>
-        <!-- // {{#each matches}}
-         // <p class="current"><a href='#'>Match:{{id}}</a></p>
-         // {{/each}} -->
+         {{#each matches}}
+         <p class="current"><a href='#'>Match:{{id}}</a></p>
+         {{/each}} 
        </div>
        <div class="col-lg-2 text-center">
        </div>
@@ -349,6 +349,9 @@ $(document).on('click','#home-navigate', function(e) {
     u: john
   });
 */
+//current matches
+  var list4 = $("#current").html();
+  var template4 = Handlebars.compile(list4);
   $.ajax({
     url: '/users/' + localStorage.user_id,
     type: 'GET', 
