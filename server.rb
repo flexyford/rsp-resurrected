@@ -99,7 +99,7 @@ class RockPaperScissors::Server < Sinatra::Application
     if user
       if user['password'] == params[:password]
         token = RockPaperScissors::UsersRepo.sign_in db, user['id']
-        { token: token }.to_json
+        { token: token, id: user['id']}.to_json ### JASON CHANGED THIS TO INCLUDE ID
       else
         status 401
         errors << "invalid password"

@@ -90,34 +90,36 @@
   </script>
 <script id='stats-page-template' type='text/x-handlebars-template'>
     <div class="container" id='player-choose'>
-      <button id='game-page'>REDIRECT TO GAME PAGE</button>
-      <div class='row'>
-        <div class="col-md-4 col-md-offset-2">
-        <h3>Please select a player</h3>
-        </div>
-        <div class="col-md-3" id='player-drop-down'>
+      <div class='row text-center'>
+         <h3>Please select a player
          <select id='select'>
             {{#each users}}
-            <option value="{{user_id}}">{{u}}<option>// needs to be associated with ajax query
+            <option id="{{this.user_id}}">{{this.username}}</option>
+            {{else}}
             {{/each}}
-         </select>
-         </div>
+          </select>
+          <button id='game-page'>Start Game</button>
+          </h3>
       </div>
      <div class='row'> 
        <div class="col-lg-2 text-center">
        </div>
        <div class="col-lg-3 text-center">
           <h3>Current leaders:</h3>
-          <p class="lead">{{name}} : {{count}}</p>
+         <!-- //<p class="lead">{{name}} : {{count}}</p> -->
        </div>
        <div class="col-lg-3 text-center">
           <h3>Your progress:</h3>
-          <p class="prog">Matches won:{{record['wins']}}</p> // ALL OF THESE NEED HOOKUPS TO DB WITH DUMMY DATA.
-          <p class="prog">Matches lost:{{record['loses']}}</p>
+               <!-- // {{#with record}}
+        // <p class="prog">Matches won:{{wins}}</p> // ALL OF THESE NEED HOOKUPS TO DB WITH DUMMY DATA.
+         // <p class="prog">Matches lost:{{losses}}</p> 
+           // {{/with}}-->
        </div>
        <div class="col-lg-3 text-center">
-          <h3>Current games:</h3>
-          <p class="current"><a href='#'>Match:{{match_id}}</a></p>
+         <h3>Current games:</h3>
+        <!-- // {{#each matches}}
+         // <p class="current"><a href='#'>Match:{{id}}</a></p>
+         // {{/each}} -->
        </div>
        <div class="col-lg-2 text-center">
        </div>
@@ -130,7 +132,7 @@
       <div class="col-lg-2 text-center">
         
       </div>
-    <div class="col-lg-3 text-center">
+    <div id='user-choice' class="col-lg-3 text-center">
       <h1>Your Name</h1>
       <div id='choice-buttons' class='btn-group btn-group-vertical'>
           <button type="button" class="btn"><i class='glyphicon glyphicon-leaf' style="font-size:60px;"></i></button>
@@ -138,12 +140,13 @@
           <button type="button" class="btn"><i class='glyphicon glyphicon-tint' style="font-size:60px;"></i></button>
         </div>
     </div>
-    <div class="col-lg-2 text-center">
-      //display winner name
+    <div id='center-container' class="col-lg-2 text-center">
+      <!-- display game winner name... have popup for Match Won?-->
+
       <h1>VS / WINNER</h1>
       <img style="width:180px" src="http://static.tvtropes.org/pmwiki/pub/images/Pokemon_1stGen_RPS_8415.jpg" border="0" alt="Fire beats Grass, Grass Beats Water, Water beats Fire">
     </div>
-    <div class="col-lg-3 text-center">
+    <div id='opponent-choice' class="col-lg-3 text-center">
       <h1>Opponent Name</h1>
       <span class="glyphicon glyphicon-question-sign" style="font-size:60px;"></span>
     </div>
@@ -158,18 +161,67 @@
 <!-- js -->
 <script>
 
-function user_logged(user_name){
+function user_logged(username){
    $('#navbar-container').empty()
     var source = $("#log-out-template").html();
     var template = Handlebars.compile(source);
     
     var myNewHTML = template({
-        u: user_name
+        u: username
     });
     $('#navbar-container').append(myNewHTML);
-    $('#body-container').empty().append($("#stats-page-template").html())
+    var my_users = load_users()
+    //var my_record = load_stats(localStorage.user_id)
+    //var my_matches = get_matches(localStorage.user_id)
+
+    //AJAX IS STUPID
+    //load_stats_template(my_users, my_record, my_matches)
 }
 
+function load_stats_template(u){
+    var source = $("#stats-page-template").html()
+    var template = Handlebars.compile(source);
+    var without_me = u.filter(function (all){
+      return all.user_id !== localStorage.user_id
+    })
+    var myNewHTML = template({
+        users: without_me,
+        //record: r,
+       // matches: m['active']
+    });
+    $('#body-container').empty().append(myNewHTML);
+}
+
+function load_stats(user_id){
+  $.ajax({
+      url: '/users/' + user_id, 
+      type: 'GET',
+      success: function(data) {
+        return data
+      }
+    });
+}
+
+function load_users(){
+  $.ajax({
+      url: '/users', 
+      type: 'GET',
+      success: function(data) {
+        load_stats_template(data)
+      }
+    });
+}
+
+function get_matches(user_id){
+   $.ajax({
+      url: '/users/'+user_id+'/matches', 
+      type: 'GET',
+      success: function(data) {
+        console.log(data)
+        return data
+      }
+    });
+}
 
 $(document).ready(function(e){
   e.preventDefault;
@@ -190,13 +242,13 @@ $(document).on('click','#signup_link', function(e) {
     'username': username,
     'password': password
   };
-  user_logged(username)
   $.ajax({
       url: '/signup', 
       type: 'POST',
       data: userInfo,
       success: function(data) {
       alert("Successfully Signed Up")
+      user_logged(username)
       }
     })
   }
@@ -211,10 +263,8 @@ $(document).on('click','#login', function(e) {
     'username': username,
     'password': password
   };
-  user_logged(username);
   $.ajax({
-    //put ajax crap here
-    url: '/signin',//needs to point to endpoint
+    url: '/signin',
     type: 'POST', 
     data: userInfo,
     success: function(returned) {
@@ -222,14 +272,26 @@ $(document).on('click','#login', function(e) {
       localStorage.setItem('token', returned['token']);
       localStorage.setItem('user_id', returned['id']);
       alert('Logged in!!')
+      console.log(username);
+      user_logged(username);
     }
   }) 
 })
 
 $(document).on('click','#logout', function(e) {
   e.preventDefault;
-  $('#navbar-container').empty().append($('#log-in-template').html());
-  $('#body-container').empty().append($('#signup-page-template').html());
+  $.ajax({
+    url: '/signout',
+    type: 'DELETE', 
+    data: {'token' : localStorage.token},
+    success: function(returned) {
+      console.log(returned);
+      localStorage.delete;
+      alert('Logged Out')
+      $('#navbar-container').empty().append($('#log-in-template').html());
+      $('#body-container').empty().append($('#signup-page-template').html());
+    }
+  }) 
 })
 
 $(document).on('click','#home-navigate', function(e) {
