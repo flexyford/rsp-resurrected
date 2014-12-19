@@ -266,7 +266,7 @@ class RockPaperScissors::Server < Sinatra::Application
     end
   end
 
-  # post  /matches/:match_id  : This endpoint will create a new round for :match_id
+  # post  /matches/:match_id/rounds  : This endpoint will create a new round for :match_id
   #     Params : None.
   #     Return : A Hash containing match_data for match_id
   #                match_data {
@@ -276,7 +276,7 @@ class RockPaperScissors::Server < Sinatra::Application
   #                  'winner_id' => INTEGER winner_id
   #                  'rounds'    => [INTEGER round_ids] # An Array of rounds for that :match_id
   #                }
-  post '/matches/:match_id' do
+  post '/matches/:match_id/rounds' do
     errors = []
     match = RockPaperScissors::MatchesRepo.find(db, params[:match_id])
     if match
