@@ -1,11 +1,11 @@
 require 'sinatra'
-require 'sinatra/reloader'
+# require 'sinatra/reloader'
 require 'json'
 require 'pry-byebug'
 
 require './lib/rockPaperScissors.rb'
 
-# set :bind, '0.0.0.0' # This is needed for Vagrant
+set :bind, '0.0.0.0' # This is needed for Vagrant
 
 class RockPaperScissors::Server < Sinatra::Application
 
