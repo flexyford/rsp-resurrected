@@ -303,8 +303,21 @@ function get_matches(user_id){
 
 $(document).ready(function(e){
   e.preventDefault;
-  $('#navbar-container').append($('#log-in-template').html());
-  $('#body-container').append($('#signup-page-template').html());
+
+  if (localStorage.user_id){
+    $.ajax({
+      url: '/users/' + localStorage.user_id,
+      type: 'GET', 
+      success: function(r) {
+        user_logged(r.username)
+      }
+    });
+  }
+  else{
+    $('#navbar-container').append($('#log-in-template').html());
+    $('#body-container').append($('#signup-page-template').html());
+  }
+
 })
 
 $(document).on('click','#signup_link', function(e) {
@@ -334,7 +347,7 @@ $(document).on('click','#signup_link', function(e) {
 
 $(document).on('click','#login', function(e) {
   e.preventDefault;
-  localStorage.delete;
+  localStorage.clear();
   var username = document.getElementById('user').value;
   var password = document.getElementById('pass').value;
   var userInfo = {
@@ -362,7 +375,7 @@ $(document).on('click','#logout', function(e) {
     type: 'DELETE', 
     data: {'token' : localStorage.token},
     success: function(returned) {
-      localStorage.delete;
+      localStorage.clear();
       alert('Logged Out')
       $('#navbar-container').empty().append($('#log-in-template').html());
       $('#body-container').empty().append($('#signup-page-template').html());
@@ -387,6 +400,10 @@ $(document).on('click','#home-navigate', function(e) {
         $('#current').append(html)
       })
   })
+
+
+
+
 $(document).on('click','#game-start', function(e) {
   e.preventDefault;
   $.ajax({
